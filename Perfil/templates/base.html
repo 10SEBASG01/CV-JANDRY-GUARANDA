@@ -1,0 +1,103 @@
+    {% load static %}
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Hoja de Vida{% endblock %} | Perfil</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+        <style>
+            :root {
+                --primary-color: #0d6efd;
+                --dark-bg: #212529;
+            }
+            body {
+                font-family: 'Poppins', sans-serif;
+                background-color: #f8f9fa;
+            }
+            .navbar {
+                padding: 1rem 0;
+                transition: all 0.3s;
+            }
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+            .nav-link {
+                font-weight: 400;
+                transition: color 0.2s;
+            }
+            .nav-link:hover {
+                color: var(--primary-color) !important;
+            }
+            main {
+                min-height: 80vh;
+            }
+            footer {
+                background: var(--dark-bg);
+                color: white;
+                padding: 2rem 0;
+                margin-top: 3rem;
+            }
+        </style>
+    </head>
+    <body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow">
+        <div class="container-fluid container-lg">
+            <a class="navbar-brand fw-bold text-primary" href="{% url 'home' %}">Perfil</a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto p-0">
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'home' %}"><i class="bi bi-house-fill me-1"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'experiencia' %}"><i class="bi bi-briefcase-fill me-1"></i> Experiencia</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'productos_academicos' %}"><i class="bi bi-book-fill me-1"></i> Académicos</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'productos_laborales' %}"><i class="bi bi-code-slash me-1"></i> Laborales</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'cursos' %}"><i class="bi bi-mortarboard-fill me-1"></i> Cursos</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'reconocimientos' %}"><i class="bi bi-patch-check-fill me-1"></i> Reconocimientos</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'garage' %}"><i class="bi bi-tools me-1"></i> Garage</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container-lg py-4">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="mt-5 py-4 border-top">
+        <div class="container d-flex justify-content-between align-items-center">
+            <span class="text-muted small">© 2025 {{ perfil.nombres }} {{ perfil.apellidos }}</span>
+            
+            <a href="/admin/" 
+            class="admin-tool-link" 
+            title="Panel de Control">
+                <i class="bi bi-wrench-adjustable-circle"></i>
+            </a>
+        </div>
+    </footer>
+
+    <style>
+        /* Estilo específico para agrandar la llave */
+        .admin-tool-link {
+            color: #6c757d; /* Color gris suave por defecto */
+            font-size: 2.5rem; /* Tamaño aumentado (era fs-4, ahora es mucho más grande) */
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .admin-tool-link:hover {
+            color: #0d6efd; /* Cambia a azul al pasar el mouse */
+            transform: rotate(15deg) scale(1.1); /* Gira un poquito y se agranda al tocarlo */
+        }
+    </style>

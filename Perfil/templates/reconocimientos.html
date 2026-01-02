@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .award-selector {
+        display: flex;
+        overflow-x: auto;
+        gap: 15px;
+        padding: 10px 5px;
+        scrollbar-width: thin;
+    }
+
+    .award-mini-card {
+        min-width: 250px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+    }
+
+    .award-mini-card:hover, .award-mini-card.active {
+        border-color: #ffc107;
+        background: #fff;
+        transform: translateY(-3px);
+    }
+
+    .diploma-viewer {
+        background: #343a40; 
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+        margin-top: 20px;
+    }
+
+    .pdf-frame {
+        width: 100%;
+        height: 700px;
+        border: 10px solid #fff; 
+        border-radius: 5px;
+        background: white;
+    }
+
+    /* ESTILO BOTÓN HOME */
+    .btn-cv-style {
+        padding: 12px 30px;
+        font-weight: 700;
+        border-radius: 50px;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-7">
+            <h2 class="fw-bold text-dark"><i class="bi bi-award text-warning"></i> Galería de Reconocimientos</h2>
+            <p class="text-muted">Selecciona un mérito para visualizar el certificado oficial.</p>
+        </div>
+        
+        <div class="col-md-5 text-end" id="contenedorBotonRec">
+            {% if datos.0.archivo_recurso %}
+            <a href="{{ datos.0.archivo_recurso.url }}" class="btn btn-primary btn-cv-style shadow-sm" download>
+                <i class="bi bi-download me-2"></i>Reconocimientos
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="award-selector mb-4">
+        {% for rec in datos %}
+        <div class="card award-mini-card shadow-sm rounded-4 {% if forloop.first %}active{% endif %}" 
+             onclick="cambiarReconocimiento('{{ rec.rutacertificado.url }}', '{{ rec.descripcionreconocimiento }}', this, '{% if rec.archivo_recurso %}{{ rec.archivo_recurso.url }}{% endif %}')">
+            <div class="card-body p-3">
+                <h6 class="mb-1 text-truncate fw-bold">{{ rec.descripcionreconocimiento }}</h6>
+                <small class="text-muted"><i class="bi bi-calendar-check"></i> {{ rec.fechareconocimiento|date:"Y" }}</small>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="text-center mb-3">
+                <h4 id="tituloActual" class="fw-bold text-success">{{ datos.0.descripcionreconocimiento }}</h4>
+            </div>
+            
+            <div class="diploma-viewer">
+                {% if datos.0.rutacertificado %}
+                <object id="visorPDF" data="{{ datos.0.rutacertificado.url }}" type="application/pdf" class="pdf-frame shadow-lg">
+                    <div class="p-5 text-white text-center">
+                        <p>Tu navegador no puede mostrar el PDF. <a href="{{ datos.0.rutacertificado.url }}" class="text-warning">Descarga el certificado aquí.</a></p>
+                    </div>
+                </object>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function cambiarReconocimiento(urlCert, titulo, elemento, urlRecurso) {
+        // Cambiar Visor
+        const visor = document.getElementById('visorPDF');
+        if(visor) visor.setAttribute('data', urlCert);
+        
+        // Cambiar Título
+        document.getElementById('tituloActual').innerText = titulo;
+
+        // ACTUALIZAR BOTÓN (Usando archivo_recurso)
+        const contenedor = document.getElementById('contenedorBotonRec');
+        if (urlRecurso && urlRecurso !== 'None' && urlRecurso !== '') {
+            contenedor.innerHTML = `
+                <a href="${urlRecurso}" class="btn btn-primary btn-cv-style shadow-sm" download>
+                    <i class="bi bi-download me-2"></i>Reconocimientos
+                </a>`;
+        } else {
+            contenedor.innerHTML = ''; 
+        }
+
+        // Estado activo
+        document.querySelectorAll('.award-mini-card').forEach(card => card.classList.remove('active'));
+        elemento.classList.add('active');
+    }
+</script>
+{% endblock %}

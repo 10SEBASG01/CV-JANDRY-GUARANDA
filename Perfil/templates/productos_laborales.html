@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Portafolio Laboral | {{ perfil.nombres }}{% endblock %}
+
+{% block content %}
+<style>
+    .work-product-card {
+        border: none;
+        border-radius: 20px;
+        background: #fff;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .work-product-card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+    }
+
+    .date-badge-laboral {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(25, 135, 84, 0.1);
+        color: #198754;
+        padding: 5px 15px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.8rem;
+    }
+
+    .icon-box-laboral {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #198754, #146c43);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 15px rgba(25, 135, 84, 0.3);
+    }
+
+    .product-title {
+        color: #2c3e50;
+        font-weight: 800;
+        margin-bottom: 10px;
+    }
+
+    .product-desc {
+        color: #5d6d7e;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .footer-card {
+        background: #fcfcfc;
+        border-top: 1px solid #f1f1f1;
+        padding: 15px 25px;
+    }
+</style>
+
+<div class="row mb-5 pt-4">
+    <div class="col-12">
+        <span class="badge bg-success mb-2">Entregables</span>
+        <h1 class="fw-bold">Productos & Logros Laborales</h1>
+        <p class="text-muted">Evidencia tangible de mi desempeño y aportes profesionales.</p>
+    </div>
+</div>
+
+<div class="row">
+    {% for prod in datos %}
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card work-product-card shadow-sm h-100">
+            <div class="date-badge-laboral">
+                {{ prod.fechaproducto|date:"Y" }}
+            </div>
+            
+            <div class="card-body p-4">
+                <div class="icon-box-laboral">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                
+                <h4 class="product-title">{{ prod.nombreproducto }}</h4>
+                <p class="product-desc">
+                    {{ prod.descripcion }}
+                </p>
+            </div>
+            
+            <div class="footer-card">
+                <div class="d-flex align-items-center justify-content-between">
+                    <small class="text-muted"><i class="bi bi-calendar-event"></i> {{ prod.fechaproducto|date:"d M, Y" }}</small>
+                    <span class="text-success small fw-bold">Ver detalle <i class="bi bi-chevron-right"></i></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <div class="display-1 text-light"><i class="bi bi-archive"></i></div>
+        <p class="text-muted">Aún no hay productos laborales registrados.</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio | {{ perfil.nombres }} {{ perfil.apellidos }}{% endblock %}
+
+{% block content %}
+<style>
+    .hero-section {
+        background: white;
+        padding: 3rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+    }
+
+    .profile-img {
+        width: 160px;
+        height: 160px;
+        object-fit: cover;
+        border: 5px solid #f8f9fa;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    /* ---- CONTACT INFO LIMPIO ---- */
+    .contact-info .small {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 0;
+    }
+
+    .contact-info i {
+        color: #0d6efd;
+        font-size: 1.1rem;
+        min-width: 22px;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+        white-space: nowrap;
+    }
+
+    .btn-cv {
+        padding: 12px 30px;
+        font-weight: 700;
+        border-radius: 50px;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-cv:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(13, 110, 253, 0.4);
+    }
+
+    .summary-card {
+        border: none;
+        border-radius: 12px;
+        transition: transform 0.3s ease;
+        background: white;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .section-icon {
+        font-size: 2rem;
+        color: #0d6efd;
+    }
+</style>
+
+<div class="hero-section">
+    <div class="row align-items-center">
+        {% if perfil %}
+        <div class="col-lg-3 text-center mb-4 mb-lg-0">
+            {% if perfil.fotoperfil %}
+                <img src="{{ perfil.fotoperfil.url }}" class="img-fluid rounded-circle profile-img">
+            {% else %}
+                <img src="https://ui-avatars.com/api/?name={{ perfil.nombres }}+{{ perfil.apellidos }}&background=0D6EFD&color=fff&size=160"
+                     class="img-fluid rounded-circle profile-img">
+            {% endif %}
+        </div>
+
+        <div class="col-lg-6 text-center text-lg-start">
+            <h1 class="display-5 fw-bold text-dark mb-1">
+                {{ perfil.nombres }} {{ perfil.apellidos }}
+            </h1>
+            <p class="h4 text-primary mb-4">{{ perfil.descripcionperfil }}</p>
+
+            <div class="contact-info row">
+                <div class="col-md-6 small">
+                    <i class="bi bi-envelope-at-fill"></i>
+                    <span class="info-label">Email:</span> {{ perfil.email_contacto }}
+                </div>
+
+                <div class="col-md-6 small">
+                    <i class="bi bi-telephone-fill"></i>
+                    <span class="info-label">Telf. Fijo:</span> {{ perfil.telefonofijo|default:"N/A" }}
+                </div>
+
+                <div class="col-md-6 small">
+                    <i class="bi bi-phone-fill"></i>
+                    <span class="info-label">Convencional:</span> {{ perfil.telefonoconvencional|default:"N/A" }}
+                </div>
+
+                <div class="col-md-6 small">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span class="info-label">Ubicación:</span> {{ perfil.direcciondomiciliaria }}
+                </div>
+
+                <div class="col-md-6 small">
+                    <i class="bi bi-card-text"></i>
+                    <span class="info-label">Cédula:</span>
+                    *******{{ perfil.numerocedula|slice:"-3:" }}
+                </div>
+
+                <div class="col-md-6 small">
+                    <i class="bi bi-car-front-fill"></i>
+                    <span class="info-label">Licencia:</span> {{ perfil.licenciaconducir|default:"No posee" }}
+                </div>
+
+                <div class="col-md-6 small">
+                    <i class="bi bi-flag-fill"></i>
+                    <span class="info-label">Nacionalidad:</span> {{ perfil.nacionalidad }}
+                </div>
+
+                <div class="col-md-6 small">
+                    <i class="bi bi-calendar-event-fill"></i>
+                    <span class="info-label">F. Nacimiento:</span> {{ perfil.fechanacimiento }}
+                </div>
+
+                <div class="col-md-6 small">
+                    <i class="bi bi-heart-fill"></i>
+                    <span class="info-label">Estado Civil:</span> {{ perfil.estadocivil }}
+                </div>
+
+                {% if perfil.sitioweb %}
+                <div class="col-md-6 small">
+                    <i class="bi bi-globe"></i>
+                    <span class="info-label">Web:</span> {{ perfil.sitioweb }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-3 text-center">
+            {% if perfil.archivocv %}
+                <a href="{{ perfil.archivocv.url }}" class="btn btn-primary btn-cv mt-4 mt-lg-0" target="_blank">
+                    <i class="bi bi-file-earmark-pdf-fill me-2"></i>Ver / Descargar CV
+                </a>
+            {% else %}
+                <button class="btn btn-secondary btn-cv mt-4 mt-lg-0" disabled>
+                    CV No Disponible
+                </button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ===== RESÚMENES (TODO TUYO, SIN BORRAR NADA) ===== -->
+
+<div class="row g-4">
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm summary-card">
+            <div class="card-body">
+                <i class="bi bi-briefcase section-icon"></i>
+                <h4 class="card-title mt-3 border-bottom pb-2">Experiencia</h4>
+                <ul class="list-unstyled mt-3">
+                    {% for exp in resumen_exp %}
+                        <li class="small mb-2 d-flex">
+                            <i class="bi bi-caret-right-fill text-primary me-2 mt-1"></i>
+                            <span><strong>{{ exp.cargodesempenado }}</strong><br>
+                            <small class="text-muted">{{ exp.nombrempresa }}</small></span>
+                        </li>
+                    {% empty %}
+                        <li class="small text-muted">No hay datos.</li>
+                    {% endfor %}
+                </ul>
+                <a href="{% url 'experiencia' %}" class="btn btn-sm btn-outline-primary mt-2">Ver más</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm summary-card">
+            <div class="card-body">
+                <i class="bi bi-mortarboard section-icon"></i>
+                <h4 class="card-title mt-3 border-bottom pb-2">Cursos</h4>
+                <ul class="list-unstyled mt-3">
+                    {% for curso in resumen_cursos %}
+                        <li class="small mb-2 d-flex">
+                            <i class="bi bi-patch-check-fill text-success me-2 mt-1"></i>
+                            <span>{{ curso.nombrecurso }}</span>
+                        </li>
+                    {% empty %}
+                        <li class="small text-muted">No hay datos.</li>
+                    {% endfor %}
+                </ul>
+                <a href="{% url 'cursos' %}" class="btn btn-sm btn-outline-primary mt-2">Ver más</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm summary-card">
+            <div class="card-body">
+                <i class="bi bi-trophy section-icon" style="color:#ffc107;"></i>
+                <h4 class="card-title mt-3 border-bottom pb-2">Logros</h4>
+                <ul class="list-unstyled mt-3">
+                    {% for rec in resumen_rec %}
+                        <li class="small mb-2 d-flex">
+                            <i class="bi bi-star-fill text-warning me-2 mt-1"></i>
+                            <span>{{ rec.descripcionreconocimiento }}</span>
+                        </li>
+                    {% empty %}
+                        <li class="small text-muted">No hay datos.</li>
+                    {% endfor %}
+                </ul>
+                <a href="{% url 'reconocimientos' %}" class="btn btn-sm btn-outline-primary mt-2">Ver más</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm summary-card">
+            <div class="card-body">
+                <i class="bi bi-book-half section-icon" style="color:#6f42c1;"></i>
+                <h4 class="card-title mt-3 border-bottom pb-2">Académicos</h4>
+                <ul class="list-unstyled mt-3">
+                    {% for acad in resumen_acad %}
+                        <li class="small mb-2 d-flex">
+                            <i class="bi bi-journal-text text-info me-2 mt-1"></i>
+                            <span>{{ acad.nombrerecurso }}</span>
+                        </li>
+                    {% empty %}
+                        <li class="small text-muted">No hay datos.</li>
+                    {% endfor %}
+                </ul>
+                <a href="{% url 'productos_academicos' %}" class="btn btn-sm btn-outline-primary mt-2">Ver más</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm summary-card">
+            <div class="card-body">
+                <i class="bi bi-cpu section-icon" style="color:#fd7e14;"></i>
+                <h4 class="card-title mt-3 border-bottom pb-2">Laborales</h4>
+                <ul class="list-unstyled mt-3">
+                    {% for lab in resumen_lab %}
+                        <li class="small mb-2 d-flex">
+                            <i class="bi bi-code-square text-secondary me-2 mt-1"></i>
+                            <span>{{ lab.nombreproducto }}</span>
+                        </li>
+                    {% empty %}
+                        <li class="small text-muted">No hay datos.</li>
+                    {% endfor %}
+                </ul>
+                <a href="{% url 'productos_laborales' %}" class="btn btn-sm btn-outline-primary mt-2">Ver más</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm summary-card">
+            <div class="card-body">
+                <i class="bi bi-tag-fill section-icon text-success"></i>
+                <h4 class="card-title mt-3 border-bottom pb-2">Garage</h4>
+                <div class="d-flex flex-wrap gap-1 mt-3">
+                    {% for item in resumen_garage %}
+                        <span class="badge bg-light text-dark border">{{ item.nombreproducto }}</span>
+                    {% empty %}
+                        <span class="small text-muted">Sin artículos.</span>
+                    {% endfor %}
+                </div>
+                <br>
+                <a href="{% url 'garage' %}" class="btn btn-sm btn-outline-primary mt-2">Ir al Garage</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

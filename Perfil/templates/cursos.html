@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Cursos y Certificaciones{% endblock %}
+
+{% block content %}
+<style>
+    .page-header { 
+        background: white; 
+        padding: 2rem; 
+        border-radius: 12px; 
+        border-left: 5px solid #198754; 
+        margin-bottom: 2rem; 
+    }
+    
+    .course-card { 
+        background: white; 
+        border-radius: 12px; 
+        cursor: pointer; 
+        transition: 0.2s; 
+        border: 1px solid #eee; 
+        margin-bottom: 1rem; 
+    }
+    
+    .course-card:hover { 
+        border-left: 5px solid #198754; 
+        transform: translateX(5px); 
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+    }
+
+    .text-truncate-custom {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2; 
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .viewer-container { 
+        background: white; 
+        border-radius: 12px; 
+        padding: 10px; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+        height: 750px;
+    }
+
+    /* ESTILO DEL BOTÓN IGUAL AL DEL HOME */
+    .btn-cv-style {
+        padding: 12px 30px;
+        font-weight: 700;
+        border-radius: 50px;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+</style>
+
+<div class="page-header shadow-sm d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="fw-bold">Cursos y Formación</h1>
+        <p class="text-muted mb-0">Certificaciones de {{ perfil.nombres }} {{ perfil.apellidos }}</p>
+    </div>
+
+    <div id="contenedorBotonDescarga">
+        {% if datos.0.archivo_extra %}
+            <a href="{{ datos.0.archivo_extra.url }}" class="btn btn-primary btn-cv-style shadow-sm" download>
+                <i class="bi bi-download me-2"></i>Cursos
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4" style="max-height: 750px; overflow-y: auto;">
+        {% for curso in datos %}
+        <div class="card course-card shadow-sm" 
+             onclick="verPDF('{{ curso.rutacertificado.url }}', '{% if curso.archivo_extra %}{{ curso.archivo_extra.url }}{% endif %}')">
+            <div class="card-body">
+                <h6 class="fw-bold mb-1 text-truncate-custom">{{ curso.nombrecurso }}</h6>
+                <p class="text-success small mb-1"><b>{{ curso.entidadpatrocinadora }}</b></p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted"><i class="bi bi-calendar3"></i> {{ curso.fechafin|date:"Y" }}</small>
+                    <span class="badge bg-light text-dark border">{{ curso.totalhoras }}h</span>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-muted text-center">No hay cursos registrados.</p>
+        {% endfor %}
+    </div>
+
+    <div class="col-md-8">
+        <div class="viewer-container border">
+            {% if datos %}
+                <embed id="pdfEmbed" 
+                        src="{{ datos.0.rutacertificado.url }}#toolbar=0&navpanes=0" 
+                        type="application/pdf" 
+                        width="100%" 
+                        height="100%" />
+            {% else %}
+                <div class="h-100 d-flex align-items-center justify-content-center bg-light rounded">
+                    <p class="text-muted">Selecciona un curso para ver el certificado</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function verPDF(urlCertificado, urlDescarga) {
+        // Cambia el visor de PDF
+        const visor = document.getElementById('pdfEmbed');
+        if (visor) {
+            visor.src = urlCertificado + "#toolbar=0&navpanes=0";
+        }
+
+        // Cambia el botón de descarga dinámicamente
+        const contenedor = document.getElementById('contenedorBotonDescarga');
+        if (urlDescarga && urlDescarga !== '') {
+            contenedor.innerHTML = `
+                <a href="${urlDescarga}" class="btn btn-primary btn-cv-style shadow-sm" download>
+                    <i class="bi bi-download me-2"></i>Cursos
+                </a>`;
+        } else {
+            contenedor.innerHTML = ''; // Si el curso no tiene archivo_extra, oculta el botón
+        }
+    }
+</script>
+{% endblock %}
