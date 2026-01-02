@@ -6,10 +6,10 @@ python manage.py collectstatic --no-input
 python manage.py migrate
 
 # --- LIMPIEZA DE LOGS ACTIVADA ---
-echo "Limpiando logs de administración..."
-echo "from django.contrib.admin.models import LogEntry; \
-LogEntry.objects.all().delete();" \
-| python manage.py shell
+#echo "Limpiando logs de administración..."
+#echo "from django.contrib.admin.models import LogEntry; \
+#LogEntry.objects.all().delete();" \
+#| python manage.py shell
 
 # Crear/Asegurar superusuario
 echo "Asegurando superusuario..."

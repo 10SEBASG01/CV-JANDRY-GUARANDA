@@ -7,7 +7,7 @@ class DatosPersonales(models.Model):
     fotoperfil = models.ImageField(upload_to='perfil/', null=True, blank=True)
     email_contacto = models.EmailField(max_length=100, null=True, blank=True)
     archivocv = models.FileField(upload_to='cv/', null=True, blank=True)
-    descripcionperfil = models.CharField(max_length=50)
+    descripcionperfil = models.CharField(max_length=200)
     perfilactivo = models.IntegerField()
     apellidos = models.CharField(max_length=60)
     nombres = models.CharField(max_length=60)
@@ -18,7 +18,7 @@ class DatosPersonales(models.Model):
     sexo_choices = [('H', 'Hombre'), ('M', 'Mujer')]
     sexo = models.CharField(max_length=1, choices=sexo_choices)
     estadocivil = models.CharField(max_length=50)
-    licenciaconducir = models.CharField(max_length=6, blank=True, null=True)
+    licenciaconducir = models.CharField(max_length=10, blank=True, null=True)
     telefonoconvencional = models.CharField(max_length=15, blank=True, null=True)
     telefonofijo = models.CharField(max_length=15, blank=True, null=True)
     direcciontrabajo = models.CharField(max_length=50, blank=True, null=True)
