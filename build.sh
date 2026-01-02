@@ -5,15 +5,14 @@ pip install -r requirements.txt
 python manage.py collectstatic --no-input
 python manage.py migrate
 
-# --- LIMPIEZA DESACTIVADA ---
-# Se comentan estas líneas para que no borren tus datos reales en el futuro
-# echo "from django.contrib.admin.models import LogEntry; \
-# from Perfil.models import DatosPersonales; \
-# LogEntry.objects.all().delete(); \
-# DatosPersonales.objects.all().delete();" \
-# | python manage.py shell
+# --- LIMPIEZA DE LOGS ACTIVADA ---
+echo "Limpiando logs de administración..."
+echo "from django.contrib.admin.models import LogEntry; \
+LogEntry.objects.all().delete();" \
+| python manage.py shell
 
-# Crear/Asegurar superusuario (Esto sí se deja siempre)
+# Crear/Asegurar superusuario
+echo "Asegurando superusuario..."
 echo "from django.contrib.auth import get_user_model; \
 User = get_user_model(); \
 User.objects.filter(username='Jandry').exists() or \
