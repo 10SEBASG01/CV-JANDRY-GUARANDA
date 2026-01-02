@@ -7,8 +7,9 @@ from .models import (
 @admin.register(DatosPersonales)
 class DatosPersonalesAdmin(admin.ModelAdmin):
     list_display = ('nombres', 'apellidos', 'numerocedula', 'email_contacto')
+    # Añadido archivo_cursos_completo aquí:
     fields = (
-        'idperfil', 'fotoperfil', 'archivocv', 
+        'idperfil', 'fotoperfil', 'archivocv', 'archivo_cursos_completo', 
         'nombres', 'apellidos', 'descripcionperfil', 
         'email_contacto', 'telefonofijo', 'telefonoconvencional',
         'numerocedula', 'nacionalidad', 'fechanacimiento', 'lugarnacimiento',
@@ -25,10 +26,23 @@ class ExperienciaLaboralAdmin(admin.ModelAdmin):
 class ReconocimientosAdmin(admin.ModelAdmin):
     list_display = ('descripcionreconocimiento', 'tiporeconocimiento', 'entidadpatrocinadora')
     list_filter = ('tiporeconocimiento',)
+    # Añadido archivo_reconocimientos_completo aquí:
+    fields = (
+        'idreconocimiento', 'idperfilconqueestaactivo', 'tiporeconocimiento', 
+        'fechareconocimiento', 'descripcionreconocimiento', 'entidadpatrocinadora',
+        'nombrecontactoauspicia', 'telefonocontactoauspicia', 'activarparaqueseveaenfront',
+        'rutacertificado', 'archivo_reconocimientos_completo'
+    )
 
 @admin.register(CursosRealizados)
 class CursosRealizadosAdmin(admin.ModelAdmin):
     list_display = ('nombrecurso', 'entidadpatrocinadora', 'totalhoras')
+    fields = (
+        'idcursorealizado', 'idperfilconqueestaactivo', 'nombrecurso', 
+        'fechainicio', 'fechafin', 'totalhoras', 'descripcioncurso', 
+        'entidadpatrocinadora', 'nombrecontactoauspicia', 'telefonocontactoauspicia', 
+        'emailempresapatrocinadora', 'activarparaqueseveaenfront', 'rutacertificado'
+    )
 
 @admin.register(ProductosAcademicos)
 class ProductosAcademicosAdmin(admin.ModelAdmin):
