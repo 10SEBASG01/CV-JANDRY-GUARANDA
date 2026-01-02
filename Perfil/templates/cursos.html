@@ -43,7 +43,6 @@
         height: 750px;
     }
 
-    /* ESTILO DEL BOTÓN IGUAL AL DEL HOME */
     .btn-cv-style {
         padding: 12px 30px;
         font-weight: 700;
@@ -60,10 +59,10 @@
         <p class="text-muted mb-0">Certificaciones de {{ perfil.nombres }} {{ perfil.apellidos }}</p>
     </div>
 
-    <div id="contenedorBotonDescarga">
-        {% if datos.0.archivo_extra %}
-            <a href="{{ datos.0.archivo_extra.url }}" class="btn btn-primary btn-cv-style shadow-sm" download>
-                <i class="bi bi-download me-2"></i>Cursos
+    <div>
+        {% if perfil.archivo_cursos_completo %}
+            <a href="{{ perfil.archivo_cursos_completo.url }}" class="btn btn-primary btn-cv-style shadow-sm" download>
+                <i class="bi bi-download me-2"></i>Descargar Todo
             </a>
         {% endif %}
     </div>
@@ -73,7 +72,7 @@
     <div class="col-md-4" style="max-height: 750px; overflow-y: auto;">
         {% for curso in datos %}
         <div class="card course-card shadow-sm" 
-             onclick="verPDF('{{ curso.rutacertificado.url }}', '{% if curso.archivo_extra %}{{ curso.archivo_extra.url }}{% endif %}')">
+             onclick="verPDF('{{ curso.rutacertificado.url }}')">
             <div class="card-body">
                 <h6 class="fw-bold mb-1 text-truncate-custom">{{ curso.nombrecurso }}</h6>
                 <p class="text-success small mb-1"><b>{{ curso.entidadpatrocinadora }}</b></p>
@@ -106,22 +105,11 @@
 </div>
 
 <script>
-    function verPDF(urlCertificado, urlDescarga) {
-        // Cambia el visor de PDF
+    function verPDF(urlCertificado) {
+        // Solo cambia el visor del PDF individual
         const visor = document.getElementById('pdfEmbed');
         if (visor) {
             visor.src = urlCertificado + "#toolbar=0&navpanes=0";
-        }
-
-        // Cambia el botón de descarga dinámicamente
-        const contenedor = document.getElementById('contenedorBotonDescarga');
-        if (urlDescarga && urlDescarga !== '') {
-            contenedor.innerHTML = `
-                <a href="${urlDescarga}" class="btn btn-primary btn-cv-style shadow-sm" download>
-                    <i class="bi bi-download me-2"></i>Cursos
-                </a>`;
-        } else {
-            contenedor.innerHTML = ''; // Si el curso no tiene archivo_extra, oculta el botón
         }
     }
 </script>

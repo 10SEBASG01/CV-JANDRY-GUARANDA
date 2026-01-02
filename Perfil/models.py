@@ -1,12 +1,14 @@
 from django.db import models
 
-from django.db import models
-
 class DatosPersonales(models.Model):
     idperfil = models.IntegerField(primary_key=True)
     fotoperfil = models.ImageField(upload_to='perfil/', null=True, blank=True)
     email_contacto = models.EmailField(max_length=100, null=True, blank=True)
     archivocv = models.FileField(upload_to='cv/', null=True, blank=True)
+    
+    # NUEVO: Campo para subir todos los certificados de cursos en un solo PDF
+    archivo_cursos_completo = models.FileField(upload_to='certificados/consolidado/', null=True, blank=True)
+    
     descripcionperfil = models.CharField(max_length=300)
     perfilactivo = models.IntegerField()
     apellidos = models.CharField(max_length=60)
@@ -14,16 +16,16 @@ class DatosPersonales(models.Model):
     nacionalidad = models.CharField(max_length=20)
     lugarnacimiento = models.CharField(max_length=60)
     fechanacimiento = models.DateField()
-    numerocedula = models.CharField(max_length=10, unique=True)
+    numerocedula = models.CharField(max_length=15, unique=True)
     sexo_choices = [('H', 'Hombre'), ('M', 'Mujer')]
     sexo = models.CharField(max_length=1, choices=sexo_choices)
     estadocivil = models.CharField(max_length=50)
-    licenciaconducir = models.CharField(max_length=10, blank=True, null=True)
-    telefonoconvencional = models.CharField(max_length=15, blank=True, null=True)
-    telefonofijo = models.CharField(max_length=15, blank=True, null=True)
-    direcciontrabajo = models.CharField(max_length=50, blank=True, null=True)
-    direcciondomiciliaria = models.CharField(max_length=50)
-    sitioweb = models.CharField(max_length=60, blank=True, null=True)
+    licenciaconducir = models.CharField(max_length=20, blank=True, null=True)
+    telefonoconvencional = models.CharField(max_length=20, blank=True, null=True)
+    telefonofijo = models.CharField(max_length=20, blank=True, null=True)
+    direcciontrabajo = models.CharField(max_length=100, blank=True, null=True)
+    direcciondomiciliaria = models.CharField(max_length=100)
+    sitioweb = models.CharField(max_length=200, blank=True, null=True)
 
     def __str__(self):
         return f"{self.nombres} {self.apellidos}"
@@ -44,7 +46,7 @@ class ExperienciaLaboral(models.Model):
     telefonocontactoempresarial = models.CharField(max_length=100)
     fechainiciogestion = models.DateField()
     fechafingestion = models.DateField(blank=True, null=True)
-    descripcionfunciones = models.TextField(max_length=500)
+    descripcionfunciones = models.TextField() # Cambiado a TextField para textos largos
     activarparaqueseveaenfront = models.BooleanField(default=True)
     rutacertificado = models.FileField(upload_to='certificados/experiencia/', blank=True, null=True)
 
@@ -54,74 +56,69 @@ class ExperienciaLaboral(models.Model):
     class Meta:
         ordering = ['-fechainiciogestion']
 
+
 class Reconocimientos(models.Model):
     TIPO_CHOICES = [('Académico', 'Académico'), ('Público', 'Público'), ('Privado', 'Privado')]
     idreconocimiento = models.IntegerField(primary_key=True)
     idperfilconqueestaactivo = models.ForeignKey(DatosPersonales, on_delete=models.CASCADE)
     tiporeconocimiento = models.CharField(max_length=200, choices=TIPO_CHOICES)
     fechareconocimiento = models.DateField()
-    descripcionreconocimiento = models.CharField(max_length=300)
+    descripcionreconocimiento = models.TextField() # Cambiado a TextField
     entidadpatrocinadora = models.CharField(max_length=300)
     nombrecontactoauspicia = models.CharField(max_length=300)
     telefonocontactoauspicia = models.CharField(max_length=100)
     activarparaqueseveaenfront = models.BooleanField(default=True)
     rutacertificado = models.FileField(upload_to='reconocimientos/', null=True, blank=True)
-    archivo_recurso = models.FileField(upload_to='recursos_cursos/', null=True, blank=True)
+    
+    # NUEVO: Campo para el PDF consolidado de reconocimientos
+    archivo_reconocimientos_completo = models.FileField(upload_to='reconocimientos/consolidado/', null=True, blank=True)
 
     def __str__(self):
         return self.descripcionreconocimiento
 
+
 class CursosRealizados(models.Model):
-    idcursorealizado = models.IntegerField(primary_key=True)
-    idperfilconqueestaactivo = models.ForeignKey(DatosPersonales, on_delete=models.CASCADE)
-    nombrecurso = models.CharField(max_length=200)
-    fechainicio = models.DateField()
-    fechafin = models.DateField()
-    totalhoras = models.IntegerField()
-    descripcioncurso = models.CharField(max_length=500)
-    entidadpatrocinadora = models.CharField(max_length=150)
-    nombrecontactoauspicia = models.CharField(max_length=200)
-    telefonocontactoauspicia = models.CharField(max_length=60)
-    emailempresapatrocinadora = models.EmailField(max_length=150)
     idcursorealizado = models.IntegerField(primary_key=True)
     idperfilconqueestaactivo = models.ForeignKey(DatosPersonales, on_delete=models.CASCADE)
     nombrecurso = models.CharField(max_length=250)
     fechainicio = models.DateField()
     fechafin = models.DateField()
     totalhoras = models.IntegerField()
-    descripcioncurso = models.CharField(max_length=500)
-    entidadpatrocinadora = models.CharField(max_length=100)
-    nombrecontactoauspicia = models.CharField(max_length=150)
+    descripcioncurso = models.TextField() # Cambiado a TextField
+    entidadpatrocinadora = models.CharField(max_length=150)
+    nombrecontactoauspicia = models.CharField(max_length=200)
     telefonocontactoauspicia = models.CharField(max_length=60)
     emailempresapatrocinadora = models.EmailField(max_length=150)
     activarparaqueseveaenfront = models.BooleanField(default=True)
     rutacertificado = models.FileField(upload_to='certificados/cursos/', blank=True, null=True)
-    archivo_extra = models.FileField(upload_to='extras_reconocimientos/', null=True, blank=True)
 
     def __str__(self):
         return self.nombrecurso
+
 
 class ProductosAcademicos(models.Model):
     idproductoacademico = models.IntegerField(primary_key=True)
     idperfilconqueestaactivo = models.ForeignKey(DatosPersonales, on_delete=models.CASCADE)
     nombrerecurso = models.CharField(max_length=200)
     clasificador = models.CharField(max_length=100)
-    descripcion = models.CharField(max_length=500)
+    descripcion = models.TextField() # Cambiado a TextField
     activarparaqueseveaenfront = models.BooleanField(default=True)
 
     def __str__(self):
         return self.nombrerecurso
+
 
 class ProductosLaborales(models.Model):
     idproductoslaborales = models.IntegerField(primary_key=True)
     idperfilconqueestaactivo = models.ForeignKey(DatosPersonales, on_delete=models.CASCADE)
     nombreproducto = models.CharField(max_length=100)
     fechaproducto = models.DateField()
-    descripcion = models.CharField(max_length=500)
+    descripcion = models.TextField() # Cambiado a TextField
     activarparaqueseveaenfront = models.BooleanField(default=True)
 
     def __str__(self):
         return self.nombreproducto
+
 
 class VentaGarage(models.Model):
     ESTADO_CHOICES = [('Bueno', 'Bueno'), ('Regular', 'Regular')]
@@ -129,11 +126,14 @@ class VentaGarage(models.Model):
     idperfilconqueestaactivo = models.ForeignKey(DatosPersonales, on_delete=models.CASCADE)
     nombreproducto = models.CharField(max_length=100)
     estadoproducto = models.CharField(max_length=40, choices=ESTADO_CHOICES)
-    descripcion = models.CharField(max_length=500)
-    valordelbien = models.DecimalField(max_digits=5, decimal_places=2)
+    descripcion = models.TextField() # Cambiado a TextField
+    valordelbien = models.DecimalField(max_digits=7, decimal_places=2) # Aumentado max_digits
     activarparaqueseveaenfront = models.BooleanField(default=True)
-    documento_interes = models.FileField(upload_to='garage/documentos/', null=True, blank=True,
-    verbose_name="Documento Adicional (PDF/Foto)"
+    documento_interes = models.FileField(
+        upload_to='garage/documentos/', 
+        null=True, 
+        blank=True,
+        verbose_name="Documento Adicional (PDF/Foto)"
     )
 
     def __str__(self):
