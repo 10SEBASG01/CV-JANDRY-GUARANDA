@@ -51,7 +51,11 @@ class ProductosAcademicosAdmin(admin.ModelAdmin):
 @admin.register(ProductosLaborales)
 class ProductosLaboralesAdmin(admin.ModelAdmin):
     list_display = ('nombreproducto', 'fechaproducto', 'activarparaqueseveaenfront')
-
+    fields = (
+        'idproductoslaborales', 'idperfilconqueestaactivo', 'nombreproducto', 
+        'fechaproducto', 'descripcion', 'url_proyecto', 'activarparaqueseveaenfront'
+    )
+    
 @admin.register(VentaGarage)
 class VentaGarageAdmin(admin.ModelAdmin):
     list_display = ('nombreproducto', 'valordelbien', 'estadoproducto', 'activarparaqueseveaenfront')

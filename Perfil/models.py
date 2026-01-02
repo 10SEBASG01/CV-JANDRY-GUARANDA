@@ -115,6 +115,8 @@ class ProductosLaborales(models.Model):
     fechaproducto = models.DateField()
     descripcion = models.TextField() # Cambiado a TextField
     activarparaqueseveaenfront = models.BooleanField(default=True)
+    url_proyecto = models.URLField(max_length=500, blank=True, null=True, verbose_name="Enlace al Proyecto (Opcional)")
+    activarparaqueseveaenfront = models.BooleanField(default=True)
 
     def __str__(self):
         return self.nombreproducto

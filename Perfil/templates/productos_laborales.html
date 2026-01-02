@@ -57,17 +57,30 @@
     }
 
     .footer-card {
-        background: #fcfcfc;
-        border-top: 1px solid #f1f1f1;
+        background: #f8f9fa;
+        border-top: 1px solid #eee;
         padding: 15px 25px;
+    }
+
+    .btn-visit {
+        color: #198754;
+        font-weight: 700;
+        text-decoration: none;
+        transition: 0.2s;
+    }
+
+    .btn-visit:hover {
+        color: #0b5131;
+        text-decoration: underline;
     }
 </style>
 
 <div class="row mb-5 pt-4">
     <div class="col-12">
-        <span class="badge bg-success mb-2">Entregables</span>
+        <span class="badge bg-success mb-2 shadow-sm">Entregables</span>
         <h1 class="fw-bold">Productos & Logros Laborales</h1>
         <p class="text-muted">Evidencia tangible de mi desempeño y aportes profesionales.</p>
+        <hr>
     </div>
 </div>
 
@@ -75,13 +88,13 @@
     {% for prod in datos %}
     <div class="col-lg-4 col-md-6 mb-4">
         <div class="card work-product-card shadow-sm h-100">
-            <div class="date-badge-laboral">
+            <div class="date-badge-laboral shadow-sm">
                 {{ prod.fechaproducto|date:"Y" }}
             </div>
             
             <div class="card-body p-4">
                 <div class="icon-box-laboral">
-                    <i class="bi bi-box-seam"></i>
+                    <i class="bi bi-rocket-takeoff"></i>
                 </div>
                 
                 <h4 class="product-title">{{ prod.nombreproducto }}</h4>
@@ -92,8 +105,17 @@
             
             <div class="footer-card">
                 <div class="d-flex align-items-center justify-content-between">
-                    <small class="text-muted"><i class="bi bi-calendar-event"></i> {{ prod.fechaproducto|date:"d M, Y" }}</small>
-                    <span class="text-success small fw-bold">Ver detalle <i class="bi bi-chevron-right"></i></span>
+                    <small class="text-muted fw-bold">
+                        <i class="bi bi-calendar-check me-1"></i> {{ prod.fechaproducto|date:"d M, Y" }}
+                    </small>
+                    
+                    {% if prod.url_proyecto %}
+                        <a href="{{ prod.url_proyecto }}" target="_blank" class="btn-visit">
+                            Visitar Sitio <i class="bi bi-box-arrow-up-right"></i>
+                        </a>
+                    {% else %}
+                        <span class="badge bg-light text-muted border">Registrado</span>
+                    {% endif %}
                 </div>
             </div>
         </div>
