@@ -17,18 +17,30 @@
         box-shadow: 0 12px 25px rgba(0,0,0,0.1) !important;
     }
 
-    .product-image-placeholder {
-        height: 180px;
-        background: #f1f3f5;
+    /* Contenedor de imagen dinámico */
+    .product-image-container {
+        height: 220px; /* Un poco más alto para que luzca la foto */
+        background: #f8f9fa;
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
+        border-bottom: 1px solid #eee;
+    }
+
+    .product-image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Ajusta la foto sin deformarla */
+    }
+
+    .product-image-placeholder {
         color: #adb5bd;
-        font-size: 3rem;
+        font-size: 4rem;
     }
 
     .price-tag {
-        font-size: 1.5rem;
+        font-size: 1.6rem;
         font-weight: 800;
         color: #198754;
     }
@@ -43,25 +55,12 @@
         font-size: 0.75rem;
         text-transform: uppercase;
         z-index: 10;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
     .status-Bueno { background-color: #d1e7dd; color: #0f5132; }
     .status-Regular { background-color: #fff3cd; color: #664d03; }
 
-    .btn-buy {
-        background-color: #212529;
-        color: white;
-        border-radius: 10px;
-        font-weight: 600;
-        transition: all 0.2s;
-    }
-
-    .btn-buy:hover {
-        background-color: #000;
-        color: #fff;
-    }
-
-    /* Ajuste para que los botones se vean bien en columna */
     .card-buttons-container {
         display: flex;
         flex-direction: column;
@@ -73,6 +72,7 @@
     <div class="col-md-8">
         <h1 class="fw-bold"><i class="bi bi-tag-fill text-success me-2"></i> Venta de Garage</h1>
         <p class="text-muted">Artículos disponibles para la venta. Precios negociables.</p>
+        <hr>
     </div>
 </div>
 
@@ -84,30 +84,38 @@
                 {{ item.estadoproducto }}
             </span>
 
-            <div class="product-image-placeholder">
-                <i class="bi bi-cart3"></i>
+            <div class="product-image-container">
+                {% if item.documento_interes %}
+                    {# Si es una imagen (jpg, png, webp), la muestra. Si es PDF, se verá el link abajo #}
+                    <img src="{{ item.documento_interes.url }}" alt="{{ item.nombreproducto }}" 
+                         onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center\'><i class=\'bi bi-file-earmark-pdf fs-1 text-primary\'></i><br><small class=\'text-muted\'>Ver PDF abajo</small></div>';">
+                {% else %}
+                    <div class="product-image-placeholder">
+                        <i class="bi bi-image"></i>
+                    </div>
+                {% endif %}
             </div>
 
-            <div class="card-body d-flex flex-column">
+            <div class="card-body d-flex flex-column p-3">
                 <h5 class="fw-bold text-dark mb-1">{{ item.nombreproducto }}</h5>
-                <p class="text-muted small flex-grow-1">{{ item.descripcion }}</p>
+                <p class="text-muted small flex-grow-1 mb-3">{{ item.descripcion }}</p>
                 
-                <div class="mt-3">
-                    <div class="mb-2">
+                <div class="mt-auto">
+                    <div class="mb-3">
                         <span class="price-tag">${{ item.valordelbien }}</span>
                     </div>
 
                     <div class="card-buttons-container">
-                        <a href="mailto:{{ perfil.email_contacto }}?subject=Interés en producto: {{ item.nombreproducto }}&body=Hola {{ perfil.nombres }}, me interesa comprar este producto." 
-                           class="btn btn-dark btn-sm w-100 py-2">
-                           <i class="bi bi-envelope me-1"></i> Consultar Correo
+                        <a href="mailto:{{ perfil.email_contacto }}?subject=Interés en: {{ item.nombreproducto }}&body=Hola {{ perfil.nombres }}, me interesa este artículo." 
+                           class="btn btn-dark btn-sm w-100 py-2 shadow-sm">
+                           <i class="bi bi-chat-dots me-2"></i> Consultar por Correo
                         </a>
 
                         {% if item.documento_interes %}
                         <a href="{{ item.documento_interes.url }}" 
                            target="_blank" 
-                           class="btn btn-outline-primary btn-sm w-100 py-2">
-                           <i class="bi bi-file-earmark-pdf me-1"></i> Ver Documento
+                           class="btn btn-outline-success btn-sm w-100 py-2">
+                           <i class="bi bi-eye me-2"></i> Ver Detalles/PDF
                         </a>
                         {% endif %}
                     </div>
