@@ -209,9 +209,12 @@
                 <h4 class="card-title mt-3 border-bottom pb-2">Logros</h4>
                 <ul class="list-unstyled mt-3">
                     {% for rec in resumen_rec %}
-                        <li class="small mb-2 d-flex">
-                            <i class="bi bi-star-fill text-warning me-2 mt-1"></i>
-                            <span>{{ rec.descripcionreconocimiento }}</span>
+                        <li class="small mb-3 d-flex align-items-center">
+                            <i class="bi bi-star-fill text-warning me-2"></i>
+                            <div>
+                                <span class="fw-bold d-block text-dark">CERTIFICADO</span>
+                                <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ rec.fechareconocimiento|date:"Y" }}</small>
+                            </div>
                         </li>
                     {% empty %}
                         <li class="small text-muted">No hay datos.</li>
