@@ -17,9 +17,8 @@
         box-shadow: 0 12px 25px rgba(0,0,0,0.1) !important;
     }
 
-    /* Contenedor de imagen dinámico */
     .product-image-container {
-        height: 220px; /* Un poco más alto para que luzca la foto */
+        height: 220px;
         background: #f8f9fa;
         display: flex;
         align-items: center;
@@ -31,7 +30,7 @@
     .product-image-container img {
         width: 100%;
         height: 100%;
-        object-fit: cover; /* Ajusta la foto sin deformarla */
+        object-fit: cover;
     }
 
     .product-image-placeholder {
@@ -66,7 +65,25 @@
         flex-direction: column;
         gap: 8px;
     }
+
+    /* Animación simple para el aviso de copiado */
+    .copy-toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #198754;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 50px;
+        display: none;
+        z-index: 1000;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
 </style>
+
+<div id="copyToast" class="copy-toast">
+    <i class="bi bi-check-circle-fill me-2"></i> ¡Correo copiado con éxito!
+</div>
 
 <div class="row mb-5 pt-4">
     <div class="col-md-8">
@@ -86,7 +103,6 @@
 
             <div class="product-image-container">
                 {% if item.documento_interes %}
-                    {# Si es una imagen (jpg, png, webp), la muestra. Si es PDF, se verá el link abajo #}
                     <img src="{{ item.documento_interes.url }}" alt="{{ item.nombreproducto }}" 
                          onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center\'><i class=\'bi bi-file-earmark-pdf fs-1 text-primary\'></i><br><small class=\'text-muted\'>Ver PDF abajo</small></div>';">
                 {% else %}
@@ -106,10 +122,10 @@
                     </div>
 
                     <div class="card-buttons-container">
-                        <a href="mailto:{{ perfil.email_contacto }}?subject=Interés en: {{ item.nombreproducto }}&body=Hola {{ perfil.nombres }}, me interesa este artículo." 
-                           class="btn btn-dark btn-sm w-100 py-2 shadow-sm">
-                           <i class="bi bi-chat-dots me-2"></i> Consultar por Correo
-                        </a>
+                        <button onclick="copyEmail('{{ item.idperfilconqueestaactivo.email_contacto }}')" 
+                                class="btn btn-dark btn-sm w-100 py-2 shadow-sm">
+                            <i class="bi bi-clipboard-check me-2"></i> Copiar Correo
+                        </button>
 
                         {% if item.documento_interes %}
                         <a href="{{ item.documento_interes.url }}" 
@@ -130,5 +146,27 @@
     </div>
     {% endfor %}
 </div>
+
+<script>
+function copyEmail(email) {
+    if (!email || email === 'None') {
+        alert("Lo siento, no hay un correo configurado para este perfil.");
+        return;
+    }
+
+    navigator.clipboard.writeText(email).then(() => {
+        const toast = document.getElementById('copyToast');
+        toast.style.display = 'block';
+        
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3000);
+    }).catch(err => {
+        console.error('Error al copiar: ', err);
+        // Fallback en caso de que el navegador bloquee el portapapeles
+        alert("Copia mi correo: " + email);
+    });
+}
+</script>
 
 {% endblock %}
