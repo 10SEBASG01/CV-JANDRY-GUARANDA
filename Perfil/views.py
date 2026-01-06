@@ -58,3 +58,15 @@ def garage(request):
     # Traemos los productos de la venta de garage
     datos = VentaGarage.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
     return render(request, 'garage.html', {'datos': datos, 'perfil': perfil})
+
+def exportar_cv_completo(request):
+    perfil = get_active_profile()
+    context = {
+        'perfil': perfil,
+        'experiencias': ExperienciaLaboral.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
+        'cursos': CursosRealizados.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
+        'reconocimientos': Reconocimientos.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
+        'academicos': ProductosAcademicos.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
+        'laborales': ProductosLaborales.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
+    }
+    return render(request, 'cv_pdf_maestro.html', context)

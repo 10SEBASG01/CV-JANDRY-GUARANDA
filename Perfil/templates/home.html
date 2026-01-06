@@ -1,247 +1,286 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>{% block title %}Hoja de Vida{% endblock %} | Perfil</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "base.html" %}
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+{% block title %}Inicio | {{ perfil.nombres }} {{ perfil.apellidos }}{% endblock %}
 
-    <style>
-        :root {
-            --primary-color: #0d6efd;
-            --electric-blue: #00d4ff;
-            --dark-bg: #212529;
-        }
+{% block content %}
+<style>
+    .hero-section {
+        background: white;
+        padding: 3rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+    }
 
-        /* FONDO DE REJILLA DE INGENIERÍA */
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
-            background-image: 
-                linear-gradient(rgba(13, 110, 253, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(13, 110, 253, 0.05) 1px, transparent 1px);
-            background-size: 30px 30px;
-            overflow-x: hidden;
-            position: relative;
-        }
+    .profile-img {
+        width: 160px;
+        height: 160px;
+        object-fit: cover;
+        border: 5px solid #f8f9fa;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
 
-        /* EFECTO FOCO (SPOTLIGHT) */
-        .cursor-spotlight {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            background: radial-gradient(
-                600px circle at var(--x) var(--y), 
-                rgba(13, 110, 253, 0.07), 
-                transparent 40%
-            );
-            z-index: -1;
-        }
+    /* ---- CONTACT INFO LIMPIO ---- */
+    .contact-info .small {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 0;
+    }
 
-        /* BARRA DE PROGRESO ARRIBA */
-        .progress-container {
-            position: fixed;
-            top: 0;
-            z-index: 2000;
-            width: 100%;
-            height: 4px;
-            background: transparent;
-        }
-        .progress-bar {
-            height: 4px;
-            background: var(--electric-blue);
-            width: 0%;
-            box-shadow: 0 0 10px var(--electric-blue);
-        }
+    .contact-info i {
+        color: #0d6efd;
+        font-size: 1.1rem;
+        min-width: 22px;
+    }
 
-        /* Navbar Glassmorphism */
-        .navbar {
-            padding: 0.8rem 0;
-            backdrop-filter: blur(12px);
-            background-color: rgba(33, 37, 41, 0.95) !important;
-            border-bottom: 2px solid var(--primary-color);
-        }
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+        white-space: nowrap;
+    }
 
-        .nav-link:hover {
-            color: var(--electric-blue) !important;
-            transform: translateY(-2px);
-            transition: 0.3s;
-        }
+    .btn-cv {
+        padding: 12px 30px;
+        font-weight: 700;
+        border-radius: 50px;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
 
-        /* Efecto Rayo en las Cards */
-        .card {
-            border-radius: 12px;
-            transition: all 0.4s ease;
-            border: none;
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            background-color: rgba(255, 255, 255, 0.9);
-        }
+    .btn-cv:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(13, 110, 253, 0.4);
+    }
 
-        .card::before {
-            content: "";
-            position: absolute;
-            top: 0; left: -150%;
-            width: 50%; height: 100%;
-            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
-            transform: skewX(-25deg);
-            transition: 0.6s;
-        }
+    .summary-card {
+        border: none;
+        border-radius: 12px;
+        transition: transform 0.3s ease;
+        background: white;
+    }
 
-        .card:hover::before { left: 150%; }
-        .card:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0,0,0,0.15); }
+    .summary-card:hover {
+        transform: translateY(-5px);
+    }
 
-        #btn-back-to-top {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: none;
-            z-index: 100;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            animation: pulse-blue 2s infinite;
-        }
+    .section-icon {
+        font-size: 2rem;
+        color: #0d6efd;
+    }
+</style>
 
-        @keyframes pulse-blue {
-            0% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(13, 110, 253, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
-        }
+<div class="hero-section">
+    <div class="row align-items-center">
+        {% if perfil %}
+        <div class="col-lg-3 text-center mb-4 mb-lg-0">
+            {% if perfil.fotoperfil %}
+                <img src="{{ perfil.fotoperfil.url }}" class="img-fluid rounded-circle profile-img">
+            {% else %}
+                <img src="https://ui-avatars.com/api/?name={{ perfil.nombres }}+{{ perfil.apellidos }}&background=0D6EFD&color=fff&size=160"
+                     class="img-fluid rounded-circle profile-img">
+            {% endif %}
+        </div>
 
-        footer {
-            background: var(--dark-bg);
-            color: white;
-            padding: 2.5rem 0;
-            margin-top: 4rem;
-        }
+        <div class="col-lg-6 text-center text-lg-start">
+            <h1 class="display-5 fw-bold text-dark mb-1">
+                {{ perfil.nombres }} {{ perfil.apellidos }}
+            </h1>
+            <p class="h4 text-primary mb-4">{{ perfil.descripcionperfil }}</p>
 
-        .admin-tool-link {
-            color: #6c757d;
-            font-size: 2.5rem;
-            transition: 0.3s;
-        }
-        .admin-tool-link:hover { color: var(--electric-blue); transform: rotate(15deg); }
+            <div class="contact-info row g-2">
+                <div class="col-md-7 col-12 small">
+                    <i class="bi bi-envelope-at-fill"></i>
+                    <span class="info-label">Email:</span> <span class="text-break">{{ perfil.email_contacto }}</span>
+                </div>
 
-        /* REGLAS PARA EL PDF (Ocultar elementos en la exportación) */
-        @media print {
-            .navbar, #btn-back-to-top, footer, .admin-tool-link, .progress-container {
-                display: none !important;
-            }
-            body {
-                background-image: none !important;
-                background-color: white !important;
-            }
-        }
-    </style>
-</head>
+                <div class="col-md-5 col-12 small">
+                    <i class="bi bi-telephone-fill"></i>
+                    <span class="info-label">Telf. Fijo:</span> {{ perfil.telefonofijo|default:"N/A" }}
+                </div>
 
-<body>
-    <div class="cursor-spotlight"></div>
+                <div class="col-md-6 col-12 small">
+                    <i class="bi bi-phone-fill"></i>
+                    <span class="info-label">Convencional:</span> {{ perfil.telefonoconvencional|default:"----" }}
+                </div>
 
-    <div class="progress-container">
-        <div class="progress-bar" id="myBar"></div>
-    </div>
+                <div class="col-md-6 col-12 small">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span class="info-label">Ubicación:</span> {{ perfil.direcciondomiciliaria }}
+                </div>
 
-    <button type="button" class="btn btn-primary btn-floating" id="btn-back-to-top">
-        <i class="bi bi-arrow-up"></i>
-    </button>
+                <div class="col-md-6 col-12 small">
+                    <i class="bi bi-card-text"></i>
+                    <span class="info-label">Cédula:</span>
+                    *******{{ perfil.numerocedula|slice:"-3:" }}
+                </div>
 
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
-        <div class="container-fluid container-lg">
-            <a class="navbar-brand fw-bold text-primary" href="{% url 'home' %}" data-aos="fade-right">
-                <i class="bi bi-code-square me-1"></i> Perfil
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'home' %}"><i class="bi bi-house-fill me-1"></i> Inicio</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'experiencia' %}"><i class="bi bi-briefcase-fill me-1"></i> Experiencia</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'productos_academicos' %}"><i class="bi bi-book-fill me-1"></i> Académicos</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'productos_laborales' %}"><i class="bi bi-code-slash me-1"></i> Laborales</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'cursos' %}"><i class="bi bi-mortarboard-fill me-1"></i> Cursos</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'reconocimientos' %}"><i class="bi bi-patch-check-fill me-1"></i> Reconocimientos</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'garage' %}"><i class="bi bi-tools me-1"></i> Garage</a></li>
-                    <li class="nav-item ms-lg-3">
-                        <button id="btn-descargar-pdf" class="btn btn-outline-primary btn-sm text-white border-white">
-                            <i class="bi bi-file-earmark-pdf-fill"></i> PDF
-                        </button>
-                    </li>
-                </ul>
+                <div class="col-md-6 col-12 small">
+                    <i class="bi bi-car-front-fill"></i>
+                    <span class="info-label">Licencia:</span> {{ perfil.licenciaconducir|default:"No posee" }}
+                </div>
+
+                <div class="col-md-6 col-12 small">
+                    <i class="bi bi-flag-fill"></i>
+                    <span class="info-label">Nacionalidad:</span> {{ perfil.nacionalidad }}
+                </div>
+
+                <div class="col-md-6 col-12 small">
+                    <i class="bi bi-calendar-event-fill"></i>
+                    <span class="info-label">F. Nacimiento:</span> {{ perfil.fechanacimiento }}
+                </div>
+
+                <div class="col-md-6 col-12 small">
+                    <i class="bi bi-heart-fill"></i>
+                    <span class="info-label">Estado Civil:</span> {{ perfil.estadocivil }}
+                </div>
+
+                {% if perfil.sitioweb %}
+                <div class="col-md-6 col-12 small">
+                    <i class="bi bi-globe"></i>
+                    <span class="info-label">Web:</span> <span class="text-break">{{ perfil.sitioweb }}</span>
+                </div>
+                {% endif %}
             </div>
         </div>
-    </nav>
 
-    <main id="exportar-pdf" class="container-lg py-4" data-aos="fade-up">
-        {% block content %}
-        {% endblock %}
-    </main>
-
-    <footer>
-        <div class="container d-flex justify-content-between align-items-center">
-            <span>© 2026 {{ perfil.nombres }} {{ perfil.apellidos }}</span>
-            <a href="/admin/" class="admin-tool-link"><i class="bi bi-wrench-adjustable-circle"></i></a>
+        <div class="col-lg-3 text-center">
+            {% if perfil.archivocv %}
+                <a href="{{ perfil.archivocv.url }}" class="btn btn-primary btn-cv mt-4 mt-lg-0" target="_blank">
+                    <i class="bi bi-file-earmark-pdf-fill me-2"></i>Ver / Descargar CV
+                </a>
+            {% else %}
+                <button class="btn btn-secondary btn-cv mt-4 mt-lg-0" disabled>
+                    CV No Disponible
+                </button>
+            {% endif %}
         </div>
-    </footer>
+        {% endif %}
+    </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script src="https://unpkg.com/cursor-effects@latest/dist/browser.js"></script>
+<div class="row g-4">
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm summary-card">
+            <div class="card-body">
+                <i class="bi bi-briefcase section-icon"></i>
+                <h4 class="card-title mt-3 border-bottom pb-2">Experiencia</h4>
+                <ul class="list-unstyled mt-3">
+                    {% for exp in resumen_exp %}
+                        <li class="small mb-2 d-flex">
+                            <i class="bi bi-caret-right-fill text-primary me-2 mt-1"></i>
+                            <span><strong>{{ exp.cargodesempenado }}</strong><br>
+                            <small class="text-muted">{{ exp.nombrempresa }}</small></span>
+                        </li>
+                    {% empty %}
+                        <li class="small text-muted">No hay datos.</li>
+                    {% endfor %}
+                </ul>
+                <a href="{% url 'experiencia' %}" class="btn btn-sm btn-outline-primary mt-2">Ver más</a>
+            </div>
+        </div>
+    </div>
 
-    <script>
-        AOS.init({ duration: 800, once: true });
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm summary-card">
+            <div class="card-body">
+                <i class="bi bi-mortarboard section-icon"></i>
+                <h4 class="card-title mt-3 border-bottom pb-2">Cursos</h4>
+                <ul class="list-unstyled mt-3">
+                    {% for curso in resumen_cursos %}
+                        <li class="small mb-2 d-flex">
+                            <i class="bi bi-patch-check-fill text-success me-2 mt-1"></i>
+                            <span>{{ curso.nombrecurso }}</span>
+                        </li>
+                    {% empty %}
+                        <li class="small text-muted">No hay datos.</li>
+                    {% endfor %}
+                </ul>
+                <a href="{% url 'cursos' %}" class="btn btn-sm btn-outline-primary mt-2">Ver más</a>
+            </div>
+        </div>
+    </div>
 
-        // Lógica del PDF
-        document.getElementById('btn-descargar-pdf').addEventListener('click', function () {
-            const element = document.getElementById('exportar-pdf');
-            const options = {
-                margin: 10,
-                filename: 'CV_{{ perfil.nombres|default:"Usuario" }}.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            html2pdf().set(options).from(element).save();
-        });
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm summary-card">
+            <div class="card-body">
+                <i class="bi bi-trophy section-icon" style="color:#ffc107;"></i>
+                <h4 class="card-title mt-3 border-bottom pb-2">Logros</h4>
+                <ul class="list-unstyled mt-3">
+                    {% for rec in resumen_rec %}
+                        <li class="small mb-3 d-flex align-items-center">
+                            <i class="bi bi-star-fill text-warning me-2"></i>
+                            <div>
+                                <span class="fw-bold d-block text-dark">CERTIFICADO</span>
+                                <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ rec.fechareconocimiento|date:"Y" }}</small>
+                            </div>
+                        </li>
+                    {% empty %}
+                        <li class="small text-muted">No hay datos.</li>
+                    {% endfor %}
+                </ul>
+                <a href="{% url 'reconocimientos' %}" class="btn btn-sm btn-outline-primary mt-2">Ver más</a>
+            </div>
+        </div>
+    </div>
 
-        // Spotlight effect
-        const spotlight = document.querySelector('.cursor-spotlight');
-        window.addEventListener('mousemove', e => {
-            spotlight.style.setProperty('--x', e.clientX + 'px');
-            spotlight.style.setProperty('--y', e.clientY + 'px');
-        });
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm summary-card">
+            <div class="card-body">
+                <i class="bi bi-book-half section-icon" style="color:#6f42c1;"></i>
+                <h4 class="card-title mt-3 border-bottom pb-2">Académicos</h4>
+                <ul class="list-unstyled mt-3">
+                    {% for acad in resumen_acad %}
+                        <li class="small mb-2 d-flex">
+                            <i class="bi bi-journal-text text-info me-2 mt-1"></i>
+                            <span>{{ acad.nombrerecurso }}</span>
+                        </li>
+                    {% empty %}
+                        <li class="small text-muted">No hay datos.</li>
+                    {% endfor %}
+                </ul>
+                <a href="{% url 'productos_academicos' %}" class="btn btn-sm btn-outline-primary mt-2">Ver más</a>
+            </div>
+        </div>
+    </div>
 
-        let mybutton = document.getElementById("btn-back-to-top");
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm summary-card">
+            <div class="card-body">
+                <i class="bi bi-cpu section-icon" style="color:#fd7e14;"></i>
+                <h4 class="card-title mt-3 border-bottom pb-2">Laborales</h4>
+                <ul class="list-unstyled mt-3">
+                    {% for lab in resumen_lab %}
+                        <li class="small mb-2 d-flex">
+                            <i class="bi bi-code-square text-secondary me-2 mt-1"></i>
+                            <span>{{ lab.nombreproducto }}</span>
+                        </li>
+                    {% empty %}
+                        <li class="small text-muted">No hay datos.</li>
+                    {% endfor %}
+                </ul>
+                <a href="{% url 'productos_laborales' %}" class="btn btn-sm btn-outline-primary mt-2">Ver más</a>
+            </div>
+        </div>
+    </div>
 
-        window.onscroll = function() {
-            var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-            var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            var scrolled = (winScroll / height) * 100;
-            document.getElementById("myBar").style.width = scrolled + "%";
-
-            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-                mybutton.style.display = "block";
-            } else {
-                mybutton.style.display = "none";
-            }
-        };
-
-        mybutton.addEventListener("click", () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-
-        new cursorEffects.clickParticle();
-    </script>
-</body>
-</html>
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm summary-card">
+            <div class="card-body">
+                <i class="bi bi-tag-fill section-icon text-success"></i>
+                <h4 class="card-title mt-3 border-bottom pb-2">Garage</h4>
+                <div class="d-flex flex-wrap gap-1 mt-3">
+                    {% for item in resumen_garage %}
+                        <span class="badge bg-light text-dark border">{{ item.nombreproducto }}</span>
+                    {% empty %}
+                        <span class="small text-muted">Sin artículos.</span>
+                    {% endfor %}
+                </div>
+                <br>
+                <a href="{% url 'garage' %}" class="btn btn-sm btn-outline-primary mt-2">Ir al Garage</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

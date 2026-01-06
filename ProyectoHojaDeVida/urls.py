@@ -13,6 +13,7 @@ urlpatterns = [
     path('cursos/', views.cursos, name='cursos'),
     path('reconocimientos/', views.reconocimientos, name='reconocimientos'),
     path('garage/', views.garage, name='garage'),
+    path('exportar-cv-completo/', views.exportar_cv_completo, name='exportar_cv'),
 ]
 
 # ESTO ES LO QUE HACE QUE EL NAVEGADOR PUEDA ABRIR TUS DIPLOMAS

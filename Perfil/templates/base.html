@@ -82,7 +82,7 @@
             overflow: hidden;
             position: relative;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            background-color: rgba(255, 255, 255, 0.9); /* Un pelín transparente para la rejilla */
+            background-color: rgba(255, 255, 255, 0.9);
         }
 
         .card::before {
@@ -153,7 +153,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item"><a class="nav-link text-white" href="{% url 'home' %}"><i class="bi bi-house-fill me-1"></i> Inicio</a></li>
                     <li class="nav-item"><a class="nav-link text-white" href="{% url 'experiencia' %}"><i class="bi bi-briefcase-fill me-1"></i> Experiencia</a></li>
                     <li class="nav-item"><a class="nav-link text-white" href="{% url 'productos_academicos' %}"><i class="bi bi-book-fill me-1"></i> Académicos</a></li>
@@ -161,6 +161,12 @@
                     <li class="nav-item"><a class="nav-link text-white" href="{% url 'cursos' %}"><i class="bi bi-mortarboard-fill me-1"></i> Cursos</a></li>
                     <li class="nav-item"><a class="nav-link text-white" href="{% url 'reconocimientos' %}"><i class="bi bi-patch-check-fill me-1"></i> Reconocimientos</a></li>
                     <li class="nav-item"><a class="nav-link text-white" href="{% url 'garage' %}"><i class="bi bi-tools me-1"></i> Garage</a></li>
+                    
+                    <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
+                        <a href="{% url 'exportar_cv' %}" target="_blank" class="btn btn-primary btn-sm px-3 shadow-sm border-white border-opacity-25">
+                            <i class="bi bi-file-earmark-pdf-fill me-1"></i> CV Completo
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -185,7 +191,6 @@
     <script>
         AOS.init({ duration: 800, once: true });
 
-        // Spotlight effect logic
         const spotlight = document.querySelector('.cursor-spotlight');
         window.addEventListener('mousemove', e => {
             spotlight.style.setProperty('--x', e.clientX + 'px');
