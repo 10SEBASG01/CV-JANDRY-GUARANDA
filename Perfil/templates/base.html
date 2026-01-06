@@ -18,6 +18,32 @@
             --dark-bg: #212529;
         }
 
+        /* FONDO DE REJILLA DE INGENIERÍA */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            background-image: 
+                linear-gradient(rgba(13, 110, 253, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(13, 110, 253, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* EFECTO FOCO (SPOTLIGHT) */
+        .cursor-spotlight {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            background: radial-gradient(
+                600px circle at var(--x) var(--y), 
+                rgba(13, 110, 253, 0.07), 
+                transparent 40%
+            );
+            z-index: -1;
+        }
+
         /* BARRA DE PROGRESO ARRIBA */
         .progress-container {
             position: fixed;
@@ -34,12 +60,6 @@
             box-shadow: 0 0 10px var(--electric-blue);
         }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
-            overflow-x: hidden;
-        }
-        
         /* Navbar Glassmorphism */
         .navbar {
             padding: 0.8rem 0;
@@ -62,6 +82,7 @@
             overflow: hidden;
             position: relative;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            background-color: rgba(255, 255, 255, 0.9); /* Un pelín transparente para la rejilla */
         }
 
         .card::before {
@@ -113,6 +134,8 @@
 </head>
 
 <body>
+    <div class="cursor-spotlight"></div>
+
     <div class="progress-container">
         <div class="progress-bar" id="myBar"></div>
     </div>
@@ -162,17 +185,21 @@
     <script>
         AOS.init({ duration: 800, once: true });
 
-        // Barra de progreso y Mostrar botón volver arriba
+        // Spotlight effect logic
+        const spotlight = document.querySelector('.cursor-spotlight');
+        window.addEventListener('mousemove', e => {
+            spotlight.style.setProperty('--x', e.clientX + 'px');
+            spotlight.style.setProperty('--y', e.clientY + 'px');
+        });
+
         let mybutton = document.getElementById("btn-back-to-top");
 
         window.onscroll = function() {
-            // Barra progreso
             var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
             var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
             var scrolled = (winScroll / height) * 100;
             document.getElementById("myBar").style.width = scrolled + "%";
 
-            // Botón subir
             if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
                 mybutton.style.display = "block";
             } else {
@@ -184,7 +211,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
-        // Solo chispas al hacer clic (más limpio)
         new cursorEffects.clickParticle();
     </script>
 </body>
