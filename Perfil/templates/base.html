@@ -15,11 +15,11 @@
         :root {
             --primary-color: #0d6efd;
             --electric-blue: #00d4ff;
-            --dark-bg: #121212; /* Un negro más elegante */
+            --dark-bg: #121212;
             --light-bg: #f8f9fa;
         }
 
-        /* 1. BARRA DE PROGRESO DE LECTURA */
+        /* BARRA DE PROGRESO */
         .progress-container {
             position: fixed;
             top: 0;
@@ -42,22 +42,32 @@
             overflow-x: hidden;
         }
         
-        /* Navbar con efecto Glassmorphism Pro */
         .navbar {
             padding: 0.8rem 0;
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            background-color: rgba(33, 37, 41, 0.9) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(33, 37, 41, 0.95) !important;
+            border-bottom: 1px solid rgba(13, 110, 253, 0.2);
         }
 
-        /* Efecto Rayo en Cards Mejorado */
+        .nav-link {
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .nav-link:hover {
+            color: var(--electric-blue) !important;
+            transform: translateY(-2px);
+            text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+        }
+
+        /* Cards con efecto Rayo */
         .card {
-            border-radius: 15px;
+            border-radius: 12px;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(0,0,0,0.05);
+            border: none;
             overflow: hidden;
             position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
         .card::before {
@@ -65,7 +75,7 @@
             position: absolute;
             top: 0; left: -150%;
             width: 50%; height: 100%;
-            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.6), transparent);
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.4), transparent);
             transform: skewX(-25deg);
             transition: 0.6s;
         }
@@ -73,16 +83,14 @@
         .card:hover::before { left: 150%; }
 
         .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-            border-color: var(--electric-blue);
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(13, 110, 253, 0.15);
         }
 
-        /* Botón de Dark Mode Flotante */
         #darkModeToggle {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 25px;
+            right: 25px;
             z-index: 1000;
             width: 50px;
             height: 50px;
@@ -91,28 +99,36 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             border: none;
-            transition: 0.3s;
         }
 
-        /* Footer con gradiente sutil */
-        footer {
-            background: linear-gradient(180deg, #212529 0%, #000 100%);
-            color: white;
-            padding: 3rem 0;
-            border-top: 3px solid var(--primary-color);
-        }
-
-        /* Clase para el modo oscuro (se activa con JS) */
         body.dark-mode {
             background-color: #1a1a1a;
-            color: #e0e0e0;
+            color: #f1f1f1;
         }
+        
         body.dark-mode .card {
             background-color: #2d2d2d;
             color: white;
-            border-color: rgba(255,255,255,0.1);
+        }
+
+        footer {
+            background: #212529;
+            color: white;
+            padding: 2.5rem 0;
+            margin-top: 4rem;
+        }
+
+        .admin-tool-link {
+            color: #6c757d;
+            font-size: 2.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .admin-tool-link:hover {
+            color: var(--electric-blue);
+            transform: rotate(20deg) scale(1.1);
         }
     </style>
 </head>
@@ -126,34 +142,41 @@
         <i class="bi bi-moon-stars-fill"></i>
     </button>
 
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm">
         <div class="container-fluid container-lg">
-            <a class="navbar-brand fw-bold text-primary" href="{% url 'home' %}" data-aos="zoom-in">
-                <i class="bi bi-terminal-fill me-2"></i>JANDRY.DEV
+            <a class="navbar-brand fw-bold text-primary" href="{% url 'home' %}" data-aos="fade-right">
+                <i class="bi bi-cpu-fill me-1"></i>PERFIL
             </a>
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'home' %}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'experiencia' %}">Experiencia</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'productos_laborales' %}">Proyectos</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'garage' %}"><i class="bi bi-gear-wide-connected"></i></a></li>
+                <ul class="navbar-nav ms-auto p-0">
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'home' %}"><i class="bi bi-house-fill me-1"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'experiencia' %}"><i class="bi bi-briefcase-fill me-1"></i> Experiencia</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'productos_academicos' %}"><i class="bi bi-book-fill me-1"></i> Académicos</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'productos_laborales' %}"><i class="bi bi-code-slash me-1"></i> Laborales</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'cursos' %}"><i class="bi bi-mortarboard-fill me-1"></i> Cursos</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'reconocimientos' %}"><i class="bi bi-patch-check-fill me-1"></i> Reconocimientos</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'garage' %}"><i class="bi bi-tools me-1"></i> Garage</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <main class="container-lg py-5" data-aos="fade-up">
+    <main class="container-lg py-4" data-aos="fade-up" data-aos-duration="800">
         {% block content %}
         {% endblock %}
     </main>
 
     <footer>
-        <div class="container text-center">
-            <p class="mb-0 small">© 2026 | Diseñado con <i class="bi bi-heart-fill text-danger"></i> por {{ perfil.nombres }}</p>
-            <a href="/admin/" class="text-muted mt-2 d-inline-block"><i class="bi bi-lock"></i></a>
+        <div class="container d-flex justify-content-between align-items-center">
+            <span class="small">© 2026 {{ perfil.nombres }} {{ perfil.apellidos }}</span>
+            <a href="/admin/" class="admin-tool-link" title="Panel de Control">
+                <i class="bi bi-wrench-adjustable-circle"></i>
+            </a>
         </div>
     </footer>
 
@@ -162,29 +185,26 @@
     <script src="https://unpkg.com/cursor-effects@latest/dist/browser.js"></script>
 
     <script>
-        AOS.init({ duration: 900, once: true });
+        AOS.init({ duration: 800, once: true });
 
-        // 1. Lógica Barra de Progreso
-        window.onscroll = function() { updateProgress() };
-        function updateProgress() {
+        // Barra de progreso de lectura
+        window.onscroll = function() {
             var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
             var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
             var scrolled = (winScroll / height) * 100;
             document.getElementById("myBar").style.width = scrolled + "%";
-        }
+        };
 
-        // 2. Lógica Dark Mode
+        // Dark Mode
         const btn = document.getElementById("darkModeToggle");
         btn.addEventListener("click", () => {
             document.body.classList.toggle("dark-mode");
             const icon = btn.querySelector("i");
             icon.classList.toggle("bi-moon-stars-fill");
             icon.classList.toggle("bi-sun-fill");
-            btn.classList.toggle("btn-light");
-            btn.classList.toggle("btn-dark");
         });
 
-        // 3. Chispas (solo en clics para no distraer tanto)
+        // Chispas al hacer clic
         new cursorEffects.clickParticle();
     </script>
 </body>
