@@ -15,20 +15,22 @@
     <style>
         :root {
             --primary-color: #0d6efd;
+            --electric-blue: #00d4ff;
             --dark-bg: #212529;
         }
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #f8f9fa;
-            overflow-x: hidden; /* Evita scroll horizontal por animaciones */
+            overflow-x: hidden;
         }
         
-        /* Navbar con efecto Glassmorphism */
+        /* Navbar con Glassmorphism y Brillo */
         .navbar {
             padding: 0.8rem 0;
             transition: all 0.4s;
             backdrop-filter: blur(10px);
-            background-color: rgba(33, 37, 41, 0.9) !important;
+            background-color: rgba(33, 37, 41, 0.95) !important;
+            border-bottom: 1px solid rgba(13, 110, 253, 0.3);
         }
 
         .nav-link {
@@ -37,39 +39,48 @@
             position: relative;
         }
 
-        /* Subrayado animado en el menú */
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: 0;
-            left: 0;
-            background-color: var(--primary-color);
-            transition: width 0.3s ease;
-        }
-        .nav-link:hover::after {
-            width: 100%;
-        }
-
+        /* Rayo azul en el hover del menú */
         .nav-link:hover {
-            color: var(--primary-color) !important;
+            color: var(--electric-blue) !important;
+            text-shadow: 0 0 8px rgba(0, 212, 255, 0.8);
             transform: translateY(-2px);
         }
 
-        main {
-            min-height: 80vh;
-        }
-
-        /* Animación suave para las cards que hereden de base */
+        /* Cards con efecto Rayo que cruza */
         .card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             border: none;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden; /* Importante para el rayo */
         }
+
+        /* El Rayo de luz (Flash) */
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(
+                to right,
+                transparent,
+                rgba(255, 255, 255, 0.4),
+                transparent
+            );
+            transform: skewX(-25deg);
+            transition: 0.5s;
+        }
+
+        .card:hover::before {
+            left: 125%;
+        }
+
         .card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(13, 110, 253, 0.2);
+            outline: 1px solid var(--electric-blue);
         }
 
         footer {
@@ -77,6 +88,7 @@
             color: white;
             padding: 2rem 0;
             margin-top: 3rem;
+            border-top: 2px solid var(--primary-color);
         }
 
         .admin-tool-link {
@@ -85,12 +97,21 @@
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
-            text-decoration: none;
         }
 
         .admin-tool-link:hover {
-            color: #0d6efd;
-            transform: rotate(15deg) scale(1.1);
+            color: var(--electric-blue);
+            filter: drop-shadow(0 0 10px var(--electric-blue));
+            transform: rotate(20deg) scale(1.2);
+        }
+
+        /* Animación para el título de la marca */
+        .navbar-brand {
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+        .navbar-brand:hover {
+            text-shadow: 0 0 15px var(--primary-color);
         }
     </style>
 </head>
@@ -99,7 +120,9 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
         <div class="container-fluid container-lg">
-            <a class="navbar-brand fw-bold text-primary" href="{% url 'home' %}" data-aos="fade-right">Perfil</a>
+            <a class="navbar-brand fw-bold text-primary" href="{% url 'home' %}" data-aos="fade-right">
+                <i class="bi bi-cpu-fill me-2"></i>PERFIL
+            </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -119,12 +142,12 @@
         </div>
     </nav>
 
-    <main class="container-lg py-4" data-aos="fade-up" data-aos-duration="800">
+    <main class="container-lg py-4" data-aos="fade-up" data-aos-duration="1000">
         {% block content %}
         {% endblock %}
     </main>
 
-    <footer class="mt-5 py-4 border-top">
+    <footer class="mt-5 py-4">
         <div class="container d-flex justify-content-between align-items-center">
             <span class="text-muted small">© 2025 {{ perfil.nombres }} {{ perfil.apellidos }}</span>
             
@@ -135,14 +158,23 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <script src="https://unpkg.com/cursor-effects@latest/dist/browser.js"></script>
+
     <script>
-        // Inicializar animaciones
+        // Inicializar animaciones de scroll
         AOS.init({
-            duration: 800, // Duración global
-            once: true,    // Solo se anima una vez para no cansar al usuario
-            offset: 100    // Distancia antes de activarse
+            duration: 800,
+            once: true,
+            offset: 50
+        });
+
+        // Activar efecto de chispas (rayos) al mover el mouse
+        window.addEventListener("load", () => {
+            new cursorEffects.fairyDustCursor({
+                colors: ["#0d6efd", "#00d4ff", "#ffffff"],
+            });
         });
     </script>
 </body>
