@@ -15,11 +15,10 @@
         :root {
             --primary-color: #0d6efd;
             --electric-blue: #00d4ff;
-            --dark-bg: #121212;
-            --light-bg: #f8f9fa;
+            --dark-bg: #212529;
         }
 
-        /* BARRA DE PROGRESO */
+        /* BARRA DE PROGRESO ARRIBA */
         .progress-container {
             position: fixed;
             top: 0;
@@ -37,37 +36,32 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: var(--light-bg);
-            transition: background-color 0.3s ease;
+            background-color: #f8f9fa;
             overflow-x: hidden;
         }
         
+        /* Navbar Glassmorphism */
         .navbar {
             padding: 0.8rem 0;
             backdrop-filter: blur(12px);
             background-color: rgba(33, 37, 41, 0.95) !important;
-            border-bottom: 1px solid rgba(13, 110, 253, 0.2);
-        }
-
-        .nav-link {
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
+            border-bottom: 2px solid var(--primary-color);
         }
 
         .nav-link:hover {
             color: var(--electric-blue) !important;
             transform: translateY(-2px);
-            text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+            transition: 0.3s;
         }
 
-        /* Cards con efecto Rayo */
+        /* Efecto Rayo en las Cards */
         .card {
             border-radius: 12px;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.4s ease;
             border: none;
             overflow: hidden;
             position: relative;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
 
         .card::before {
@@ -75,46 +69,35 @@
             position: absolute;
             top: 0; left: -150%;
             width: 50%; height: 100%;
-            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.4), transparent);
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
             transform: skewX(-25deg);
             transition: 0.6s;
         }
 
         .card:hover::before { left: 150%; }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0,0,0,0.15); }
 
-        .card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(13, 110, 253, 0.15);
-        }
-
-        #darkModeToggle {
+        /* BOTÓN VOLVER ARRIBA */
+        #btn-back-to-top {
             position: fixed;
-            bottom: 25px;
-            right: 25px;
-            z-index: 1000;
-            width: 50px;
-            height: 50px;
+            bottom: 20px;
+            right: 20px;
+            display: none;
+            z-index: 100;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            border: none;
+            width: 45px;
+            height: 45px;
+            animation: pulse-blue 2s infinite;
         }
 
-        body.dark-mode {
-            background-color: #1a1a1a;
-            color: #f1f1f1;
-        }
-        
-        body.dark-mode .card {
-            background-color: #2d2d2d;
-            color: white;
+        @keyframes pulse-blue {
+            0% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(13, 110, 253, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
         }
 
         footer {
-            background: #212529;
+            background: var(--dark-bg);
             color: white;
             padding: 2.5rem 0;
             margin-top: 4rem;
@@ -123,13 +106,9 @@
         .admin-tool-link {
             color: #6c757d;
             font-size: 2.5rem;
-            transition: all 0.3s ease;
+            transition: 0.3s;
         }
-
-        .admin-tool-link:hover {
-            color: var(--electric-blue);
-            transform: rotate(20deg) scale(1.1);
-        }
+        .admin-tool-link:hover { color: var(--electric-blue); transform: rotate(15deg); }
     </style>
 </head>
 
@@ -138,22 +117,20 @@
         <div class="progress-bar" id="myBar"></div>
     </div>
 
-    <button id="darkModeToggle" class="btn btn-dark">
-        <i class="bi bi-moon-stars-fill"></i>
+    <button type="button" class="btn btn-primary btn-floating" id="btn-back-to-top">
+        <i class="bi bi-arrow-up"></i>
     </button>
 
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container-fluid container-lg">
             <a class="navbar-brand fw-bold text-primary" href="{% url 'home' %}" data-aos="fade-right">
-                <i class="bi bi-cpu-fill me-1"></i>PERFIL
+                <i class="bi bi-code-square me-1"></i> JANDRY.DEV
             </a>
-
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto p-0">
+                <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link text-white" href="{% url 'home' %}"><i class="bi bi-house-fill me-1"></i> Home</a></li>
                     <li class="nav-item"><a class="nav-link text-white" href="{% url 'experiencia' %}"><i class="bi bi-briefcase-fill me-1"></i> Experiencia</a></li>
                     <li class="nav-item"><a class="nav-link text-white" href="{% url 'productos_academicos' %}"><i class="bi bi-book-fill me-1"></i> Académicos</a></li>
@@ -166,17 +143,15 @@
         </div>
     </nav>
 
-    <main class="container-lg py-4" data-aos="fade-up" data-aos-duration="800">
+    <main class="container-lg py-4" data-aos="fade-up">
         {% block content %}
         {% endblock %}
     </main>
 
     <footer>
         <div class="container d-flex justify-content-between align-items-center">
-            <span class="small">© 2026 {{ perfil.nombres }} {{ perfil.apellidos }}</span>
-            <a href="/admin/" class="admin-tool-link" title="Panel de Control">
-                <i class="bi bi-wrench-adjustable-circle"></i>
-            </a>
+            <span>© 2026 {{ perfil.nombres }} {{ perfil.apellidos }}</span>
+            <a href="/admin/" class="admin-tool-link"><i class="bi bi-wrench-adjustable-circle"></i></a>
         </div>
     </footer>
 
@@ -187,24 +162,29 @@
     <script>
         AOS.init({ duration: 800, once: true });
 
-        // Barra de progreso de lectura
+        // Barra de progreso y Mostrar botón volver arriba
+        let mybutton = document.getElementById("btn-back-to-top");
+
         window.onscroll = function() {
+            // Barra progreso
             var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
             var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
             var scrolled = (winScroll / height) * 100;
             document.getElementById("myBar").style.width = scrolled + "%";
+
+            // Botón subir
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                mybutton.style.display = "block";
+            } else {
+                mybutton.style.display = "none";
+            }
         };
 
-        // Dark Mode
-        const btn = document.getElementById("darkModeToggle");
-        btn.addEventListener("click", () => {
-            document.body.classList.toggle("dark-mode");
-            const icon = btn.querySelector("i");
-            icon.classList.toggle("bi-moon-stars-fill");
-            icon.classList.toggle("bi-sun-fill");
+        mybutton.addEventListener("click", () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
-        // Chispas al hacer clic
+        // Solo chispas al hacer clic (más limpio)
         new cursorEffects.clickParticle();
     </script>
 </body>
