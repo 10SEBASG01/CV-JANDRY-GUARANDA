@@ -18,7 +18,6 @@
             --dark-bg: #212529;
         }
 
-        /* FONDO DE REJILLA DE INGENIERÍA */
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #f8f9fa;
@@ -30,7 +29,14 @@
             position: relative;
         }
 
-        /* EFECTO FOCO (SPOTLIGHT) */
+        /* AJUSTE PARA MODALES: Forzar que el backdrop no rompa la interfaz */
+        .modal-backdrop {
+            z-index: 1040 !important;
+        }
+        .modal {
+            z-index: 1050 !important;
+        }
+
         .cursor-spotlight {
             position: fixed;
             top: 0; left: 0;
@@ -44,7 +50,6 @@
             z-index: -1;
         }
 
-        /* BARRA DE PROGRESO ARRIBA */
         .progress-container {
             position: fixed;
             top: 0;
@@ -60,7 +65,6 @@
             box-shadow: 0 0 10px var(--electric-blue);
         }
 
-        /* Navbar Glassmorphism */
         .navbar {
             padding: 0.8rem 0;
             backdrop-filter: blur(12px);
@@ -74,7 +78,6 @@
             transition: 0.3s;
         }
 
-        /* Efecto Rayo en las Cards */
         .card {
             border-radius: 12px;
             transition: all 0.4s ease;
@@ -98,7 +101,6 @@
         .card:hover::before { left: 150%; }
         .card:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0,0,0,0.15); }
 
-        /* BOTÓN VOLVER ARRIBA */
         #btn-back-to-top {
             position: fixed;
             bottom: 20px;
@@ -146,7 +148,7 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container-fluid container-lg">
-            <a class="navbar-brand fw-bold text-primary" href="{% url 'home' %}" data-aos="fade-right">
+            <a class="navbar-brand fw-bold text-primary" href="{% url 'home' %}">
                 <i class="bi bi-code-square me-1"></i> Perfil
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -172,7 +174,7 @@
         </div>
     </nav>
 
-    <main class="container-lg py-4" data-aos="fade-up">
+    <main class="container-lg py-4">
         {% block content %}
         {% endblock %}
     </main>
@@ -203,7 +205,9 @@
             var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
             var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
             var scrolled = (winScroll / height) * 100;
-            document.getElementById("myBar").style.width = scrolled + "%";
+            if(document.getElementById("myBar")) {
+                document.getElementById("myBar").style.width = scrolled + "%";
+            }
 
             if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
                 mybutton.style.display = "block";
