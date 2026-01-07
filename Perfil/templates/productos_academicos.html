@@ -4,6 +4,15 @@
 
 {% block content %}
 <style>
+    /* PARCHE PARA EL PROBLEMA DEL FONDO OSCURO (MODAL BACKDROP) */
+    .modal-backdrop {
+        z-index: 1040 !important;
+    }
+    .modal {
+        z-index: 1050 !important;
+    }
+
+    /* TUS ESTILOS ORIGINALES */
     .academic-card {
         border: none;
         border-radius: 15px;
