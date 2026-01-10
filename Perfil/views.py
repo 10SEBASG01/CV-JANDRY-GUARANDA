@@ -17,6 +17,7 @@ def get_active_profile():
     return DatosPersonales.objects.filter(perfilactivo=1).first()
 
 def link_callback(uri, rel):
+    """Permite que Render encuentre tu foto de perfil correctamente"""
     if uri.startswith(settings.MEDIA_URL):
         path = os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, ""))
     elif uri.startswith(settings.STATIC_URL):
@@ -25,7 +26,7 @@ def link_callback(uri, rel):
         return uri
     return path
 
-# --- VISTAS DE NAVEGACIÓN ---
+# --- Vistas de Navegación ---
 def home(request): return render(request, 'home.html', {'perfil': get_active_profile()})
 def experiencia(request): return render(request, 'experiencia.html', {'datos': ExperienciaLaboral.objects.all(), 'perfil': get_active_profile()})
 def productos_academicos(request): return render(request, 'productos_academicos.html', {'datos': ProductosAcademicos.objects.all(), 'perfil': get_active_profile()})
@@ -34,7 +35,7 @@ def cursos(request): return render(request, 'cursos.html', {'datos': CursosReali
 def reconocimientos(request): return render(request, 'reconocimientos.html', {'datos': Reconocimientos.objects.all(), 'perfil': get_active_profile()})
 def garage(request): return render(request, 'garage.html', {'datos': VentaGarage.objects.all(), 'perfil': get_active_profile()})
 
-# --- FUNCIÓN MAESTRA DE PDF ---
+# --- Exportación PDF Maestra ---
 def exportar_cv_completo(request):
     perfil = get_active_profile()
     context = {
@@ -46,36 +47,30 @@ def exportar_cv_completo(request):
         'laborales': ProductosLaborales.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
     }
 
-    # 1. Crear el CV base (Hoja de texto diseñada)
+    # 1. Crear el PDF con el texto y diseño
     template = get_template('cv_pdf_maestro.html')
     html = template.render(context)
-    pdf_texto = io.BytesIO()
-    pisa.CreatePDF(io.BytesIO(html.encode("UTF-8")), dest=pdf_texto, link_callback=link_callback)
+    pdf_base = io.BytesIO()
+    pisa.CreatePDF(io.BytesIO(html.encode("UTF-8")), dest=pdf_base, link_callback=link_callback)
 
-    # 2. Preparar el Merger para unir archivos
+    # 2. Merger para unir los documentos reales
     merger = PdfMerger()
-    pdf_texto.seek(0)
-    merger.append(pdf_texto)
+    pdf_base.seek(0)
+    merger.append(pdf_base)
 
-    # 3. Función para pegar los PDFs reales (Certificados)
-    def agregar_pdf(campo_archivo):
-        if campo_archivo and hasattr(campo_archivo, 'name') and campo_archivo.name.lower().endswith('.pdf'):
+    # 3. Función segura para adjuntar archivos PDF originales
+    def adjuntar_pdf(campo):
+        if campo and hasattr(campo, 'name') and campo.name.lower().endswith('.pdf'):
             try:
-                archivo_abierto = campo_archivo.open(mode='rb')
-                merger.append(io.BytesIO(archivo_abierto.read()))
-                archivo_abierto.close()
-            except:
-                pass
+                with campo.open(mode='rb') as f:
+                    merger.append(io.BytesIO(f.read()))
+            except: pass
 
-    # 4. Pegar documentos al final en orden
-    for exp in context['experiencias']:
-        agregar_pdf(exp.rutacertificado)
-    for curso in context['cursos']:
-        agregar_pdf(curso.rutacertificado)
-    for rec in context['reconocimientos']:
-        agregar_pdf(rec.rutacertificado)
+    # Adjuntar certificados reales al final
+    for c in context['cursos']: adjuntar_pdf(c.rutacertificado)
+    for r in context['reconocimientos']: adjuntar_pdf(r.rutacertificado)
 
-    # 5. Generar Salida
+    # 4. Respuesta
     output = io.BytesIO()
     merger.write(output)
     merger.close()
