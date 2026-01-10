@@ -5,24 +5,24 @@
     <style>
         @page { size: a4; margin: 1.5cm; }
         body { font-family: Helvetica, Arial, sans-serif; font-size: 10px; color: #333; line-height: 1.4; }
+        
+        /* Estilos CV */
         .header-table { width: 100%; margin-bottom: 20px; border-bottom: 2px solid #0d6efd; padding-bottom: 10px; }
         .foto-perfil { width: 100px; height: 100px; border-radius: 50px; }
         .info-header { padding-left: 20px; vertical-align: middle; }
         .nombre { font-size: 22px; font-weight: bold; color: #000; text-transform: uppercase; }
         .subtitulo { font-size: 14px; color: #0d6efd; font-weight: bold; }
         .titulo-seccion { background-color: #f8f9fa; border-left: 4pt solid #0d6efd; color: #0d6efd; font-weight: bold; text-transform: uppercase; padding: 5px 10px; margin-top: 15px; font-size: 11px; }
-        .item-titulo { font-weight: bold; color: #000; }
-        .fecha { color: #666; font-style: italic; font-size: 9px; }
-        table { width: 100%; border-collapse: collapse; }
         
-        /* Estilos para separar los anexos */
+        /* Estilos Separadores */
         .salto-pagina { page-break-before: always; }
-        .portada-anexo { 
-            text-align: center; 
-            padding-top: 8cm; 
-            color: #0d6efd;
-            border: 10px solid #0d6efd;
-            height: 15cm;
+        .separador-azul {
+            background-color: #0d6efd;
+            color: white;
+            text-align: center;
+            padding-top: 9cm;
+            height: 20cm;
+            margin: -1.5cm; /* Para llenar toda la hoja */
         }
     </style>
 </head>
@@ -40,7 +40,7 @@
                     <div class="subtitulo">{{ perfil.descripcionperfil }}</div>
                     <div class="contacto">
                         <strong>Email:</strong> {{ perfil.email_contacto }} | <strong>Tel:</strong> {{ perfil.telefonofijo }}<br>
-                        <strong>Dirección:</strong> {{ perfil.direcciondomiciliaria }}
+                        <strong>Dir:</strong> {{ perfil.direcciondomiciliaria }}
                     </div>
                 </td>
             </tr>
@@ -48,8 +48,8 @@
 
         <div class="titulo-seccion">Experiencia Laboral</div>
         {% for exp in experiencias %}
-            <table style="margin-bottom: 8px;">
-                <tr><td class="item-titulo">{{ exp.cargodesempenado }}</td><td style="text-align: right;" class="fecha">{{ exp.fechainiciogestion }} - {{ exp.fechafingestion|default:"Actualidad" }}</td></tr>
+            <table style="margin-bottom: 8px; width: 100%;">
+                <tr><td style="font-weight:bold;">{{ exp.cargodesempenado }}</td><td style="text-align: right;">{{ exp.fechainiciogestion }} - {{ exp.fechafingestion|default:"Actualidad" }}</td></tr>
                 <tr><td colspan="2"><strong>{{ exp.nombrempresa }}</strong> | {{ exp.lugarempresa }}</td></tr>
                 <tr><td colspan="2" style="text-align: justify;">{{ exp.descripcionfunciones }}</td></tr>
             </table>
@@ -59,23 +59,23 @@
         <table style="width: 100%;">
             {% for curso in cursos %}
                 {% if forloop.counter0|divisibleby:2 %}<tr>{% endif %}
-                    <td style="width: 50%; padding-bottom: 3px;">• {{ curso.nombrecurso }} ({{ curso.totalhoras }}h)</td>
+                    <td style="width: 50%;">• {{ curso.nombrecurso }} ({{ curso.totalhoras }}h)</td>
                 {% if forloop.counter|divisibleby:2 or forloop.last %}</tr>{% endif %}
             {% endfor %}
         </table>
 
         {% if cursos %}
         <div class="salto-pagina">
-            <div class="portada-anexo">
-                <h1 style="font-size: 40px;">ANEXO:<br>CERTIFICADOS DE CURSOS</h1>
+            <div class="separador-azul">
+                <h1 style="font-size: 40px; border-bottom: 5px solid white; display: inline-block;">ANEXO:<br>CERTIFICADOS DE CURSOS</h1>
             </div>
         </div>
         {% endif %}
 
         {% if reconocimientos %}
         <div class="salto-pagina">
-            <div class="portada-anexo">
-                <h1 style="font-size: 40px;">ANEXO:<br>LOGROS Y RECONOCIMIENTOS</h1>
+            <div class="separador-azul">
+                <h1 style="font-size: 40px; border-bottom: 5px solid white; display: inline-block;">ANEXO:<br>RECONOCIMIENTOS</h1>
             </div>
         </div>
         {% endif %}
