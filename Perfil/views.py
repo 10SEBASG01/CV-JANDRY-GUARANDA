@@ -4,8 +4,6 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.template.loader import get_template
 from django.conf import settings
-
-# Librerías para PDF
 from xhtml2pdf import pisa
 from PyPDF2 import PdfMerger
 
@@ -17,12 +15,10 @@ from Perfil.models import (
 )
 
 def get_active_profile():
-    """Obtiene el perfil marcado como activo."""
     return DatosPersonales.objects.filter(perfilactivo=1).first()
 
-# FUNCIÓN CRÍTICA PARA IMÁGENES EN RENDER
 def link_callback(uri, rel):
-    """Convierte URLs de media/static en rutas físicas para xhtml2pdf."""
+    """Manejo de rutas para Render"""
     if uri.startswith(settings.MEDIA_URL):
         path = os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, ""))
     elif uri.startswith(settings.STATIC_URL):
@@ -31,19 +27,10 @@ def link_callback(uri, rel):
         return uri
     return path
 
-# --- VISTAS DE NAVEGACIÓN (Las que faltaban y causaban el error) ---
-
+# --- VISTAS DE NAVEGACIÓN ---
 def home(request):
     perfil = get_active_profile()
-    context = {
-        'perfil': perfil,
-        'resumen_exp': ExperienciaLaboral.objects.filter(idperfilconqueestaactivo=perfil)[:3],
-        'resumen_cursos': CursosRealizados.objects.filter(idperfilconqueestaactivo=perfil)[:3],
-        'resumen_garage': VentaGarage.objects.filter(idperfilconqueestaactivo=perfil)[:5],
-        'resumen_rec': Reconocimientos.objects.filter(idperfilconqueestaactivo=perfil)[:3],
-        'resumen_acad': ProductosAcademicos.objects.filter(idperfilconqueestaactivo=perfil)[:3],
-        'resumen_lab': ProductosLaborales.objects.filter(idperfilconqueestaactivo=perfil)[:3],
-    }
+    context = {'perfil': perfil}
     return render(request, 'home.html', context)
 
 def experiencia(request):
@@ -58,7 +45,7 @@ def productos_academicos(request):
 
 def productos_laborales(request):
     perfil = get_active_profile()
-    datos = ProductosLaborales.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True).order_by('-fechaproducto')
+    datos = ProductosLaborales.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
     return render(request, 'productos_laborales.html', {'datos': datos, 'perfil': perfil})
 
 def cursos(request):
@@ -68,7 +55,7 @@ def cursos(request):
 
 def reconocimientos(request):
     perfil = get_active_profile()
-    datos = Reconocimientos.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True).order_by('-fechareconocimiento')
+    datos = Reconocimientos.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
     return render(request, 'reconocimientos.html', {'datos': datos, 'perfil': perfil})
 
 def garage(request):
@@ -76,8 +63,7 @@ def garage(request):
     datos = VentaGarage.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
     return render(request, 'garage.html', {'datos': datos, 'perfil': perfil})
 
-# --- FUNCIÓN DE EXPORTACIÓN (PDF + IMAGEN + CERTIFICADOS) ---
-
+# --- FUNCIÓN MAESTRA DE PDF ---
 def exportar_cv_completo(request):
     perfil = get_active_profile()
     context = {
@@ -89,38 +75,43 @@ def exportar_cv_completo(request):
         'laborales': ProductosLaborales.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
     }
 
-    # 1. Generar Hoja Maestra (CV con foto)
-    template = get_template('cv_pdf_maestro.html')
-    html = template.render(context)
-    pdf_texto = io.BytesIO()
-    
-    pisa.CreatePDF(
-        io.BytesIO(html.encode("UTF-8")), 
-        dest=pdf_texto,
-        link_callback=link_callback
-    )
-
-    # 2. Unir Certificados
     merger = PdfMerger()
-    pdf_texto.seek(0)
-    merger.append(pdf_texto)
 
-    def adjuntar_seguro(campo):
-        if campo and campo.name.lower().endswith('.pdf'):
+    # 1. Función para crear PDF desde HTML (CV y Separadores)
+    def crear_pdf_en_memoria(template_name, extra_context):
+        tmpl = get_template(template_name)
+        html_content = tmpl.render(extra_context)
+        result = io.BytesIO()
+        pisa.CreatePDF(io.BytesIO(html_content.encode("UTF-8")), dest=result, link_callback=link_callback)
+        result.seek(0)
+        return result
+
+    # 2. Agregar CV Principal
+    merger.append(crear_pdf_en_memoria('cv_pdf_maestro.html', context))
+
+    # 3. SECCIÓN DE CURSOS
+    cursos_con_pdf = [c for c in context['cursos'] if c.rutacertificado]
+    if cursos_con_pdf:
+        # Página separadora
+        merger.append(crear_pdf_en_memoria('separador_pdf.html', {'titulo': 'ANEXO: CERTIFICADOS DE CURSOS'}))
+        for curso in cursos_con_pdf:
             try:
-                # Lectura binaria directa para evitar errores de ruta en Render
-                with campo.open(mode='rb') as f:
+                with curso.rutacertificado.open(mode='rb') as f:
                     merger.append(io.BytesIO(f.read()))
-            except Exception as e:
-                print(f"No se pudo adjuntar un archivo: {e}")
+            except: pass
 
-    # Adjuntar certificados de cursos y reconocimientos al final
-    for curso in context['cursos']:
-        adjuntar_seguro(curso.rutacertificado)
-    for rec in context['reconocimientos']:
-        adjuntar_seguro(rec.rutacertificado)
+    # 4. SECCIÓN DE RECONOCIMIENTOS
+    recs_con_pdf = [r for r in context['reconocimientos'] if r.rutacertificado]
+    if recs_con_pdf:
+        # Página separadora
+        merger.append(crear_pdf_en_memoria('separador_pdf.html', {'titulo': 'ANEXO: LOGROS Y RECONOCIMIENTOS'}))
+        for rec in recs_con_pdf:
+            try:
+                with rec.rutacertificado.open(mode='rb') as f:
+                    merger.append(io.BytesIO(f.read()))
+            except: pass
 
-    # 3. Respuesta Final
+    # 5. Respuesta
     output = io.BytesIO()
     merger.write(output)
     merger.close()
