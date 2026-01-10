@@ -3,59 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        /* Estilos optimizados para xhtml2pdf */
         @page {
             size: a4;
-            margin: 1cm;
+            margin: 1.5cm;
+            @bottom-right {
+                content: "Página " counter(page) " de " counter(pages);
+                font-size: 9px;
+            }
         }
         body { 
             background-color: white; 
             font-family: Helvetica, Arial, sans-serif; 
-            font-size: 11px; 
+            font-size: 10.5px; 
             color: #333;
-            line-height: 1.4;
+            line-height: 1.5;
         }
         .container { width: 100%; }
-        .seccion { margin-bottom: 20px; }
+        /* Evita que una sección se corte a la mitad entre dos páginas */
+        .seccion { margin-bottom: 20px; border-top: 0.1pt solid #ffffff; } 
         .titulo-seccion { 
-            border-bottom: 2px solid #0d6efd; 
+            border-bottom: 1.5pt solid #0d6efd; 
             color: #0d6efd; 
             font-weight: bold; 
             text-transform: uppercase; 
-            padding-bottom: 5px;
+            padding-bottom: 3px;
             margin-bottom: 10px; 
-            font-size: 14px;
+            font-size: 13px;
         }
         .header-cv { 
-            text-align: center; 
-            margin-bottom: 25px; 
-            border-bottom: 1px solid #eee; 
-            padding-bottom: 15px; 
+            margin-bottom: 20px; 
+            padding-bottom: 10px; 
         }
-        .nombre { font-size: 24px; font-weight: bold; margin: 0; color: #000; }
-        .subtitulo { font-size: 16px; color: #0d6efd; margin: 5px 0; }
-        .contacto { color: #666; font-size: 10px; }
-        .item-titulo { font-weight: bold; color: #000; }
-        .fecha { color: #666; font-style: italic; }
-        .texto-secundario { color: #555; }
+        .nombre { font-size: 22px; font-weight: bold; margin: 0; color: #000; text-align: center; }
+        .subtitulo { font-size: 15px; color: #0d6efd; margin: 5px 0; text-align: center; }
+        .contacto { color: #555; font-size: 9px; text-align: center; margin-top: 5px; }
+        .item-titulo { font-weight: bold; color: #000; font-size: 11px; }
+        .fecha { color: #666; font-style: italic; font-size: 10px; }
         table { width: 100%; border-collapse: collapse; }
-        td { vertical-align: top; padding: 2px 0; }
+        td { vertical-align: top; }
+        .descripcion { margin-top: 3px; text-align: justify; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header-cv">
-            <div class="nombre">{{ perfil.nombres }} {{ perfil.apellidos }}</div>
-            <div class="subtitulo">{{ perfil.descripcionperfil }}</div>
-            <div class="contacto">
-                {{ perfil.email_contacto }} | {{ perfil.telefonofijo }} | {{ perfil.direcciondomiciliaria }}
-            </div>
+            <table style="width: 100%;">
+                <tr>
+                    <td style="text-align: center;">
+                        <div class="nombre">{{ perfil.nombres }} {{ perfil.apellidos }}</div>
+                        <div class="subtitulo">{{ perfil.descripcionperfil }}</div>
+                        <div class="contacto">
+                            {{ perfil.email_contacto }} | {{ perfil.telefonofijo }} | {{ perfil.direcciondomiciliaria }}
+                        </div>
+                    </td>
+                </tr>
+            </table>
         </div>
 
         <div class="seccion">
             <div class="titulo-seccion">Experiencia Laboral</div>
             {% for exp in experiencias %}
-                <div style="margin-bottom: 12px;">
+                <div style="margin-bottom: 10px; pdf-keep-with-next: true;">
                     <table style="width: 100%;">
                         <tr>
                             <td class="item-titulo">{{ exp.cargodesempenado }}</td>
@@ -64,8 +72,8 @@
                             </td>
                         </tr>
                     </table>
-                    <div class="texto-secundario">{{ exp.nombrempresa }} | {{ exp.lugarempresa }}</div>
-                    <div style="margin-top: 4px;">{{ exp.descripcionfunciones }}</div>
+                    <div style="color: #444; font-weight: bold;">{{ exp.nombrempresa }} | {{ exp.lugarempresa }}</div>
+                    <div class="descripcion">{{ exp.descripcionfunciones }}</div>
                 </div>
             {% endfor %}
         </div>
@@ -74,9 +82,9 @@
             <div class="titulo-seccion">Productos Laborales y Proyectos</div>
             {% for lab in laborales %}
                 <div style="margin-bottom: 8px;">
-                    <span class="item-titulo">{{ lab.nombreproducto }}</span>
+                    <span class="item-titulo">• {{ lab.nombreproducto }}</span>
                     {% if lab.fechaproducto %}<span class="fecha">({{ lab.fechaproducto|date:"Y" }})</span>{% endif %}
-                    <p style="margin: 2px 0;">{{ lab.descripcion }}</p>
+                    <div style="padding-left: 10px;">{{ lab.descripcion }}</div>
                 </div>
             {% endfor %}
         </div>
@@ -85,8 +93,9 @@
             <div class="titulo-seccion">Productos Académicos</div>
             {% for acad in academicos %}
                 <div style="margin-bottom: 8px;">
-                    <span class="item-titulo">{{ acad.nombrerecurso }}</span> ({{ acad.clasificador }})
-                    <p style="margin: 2px 0;">{{ acad.descripcion }}</p>
+                    <span class="item-titulo">• {{ acad.nombrerecurso }}</span> 
+                    <span class="texto-secundario">({{ acad.clasificador }})</span>
+                    <div style="padding-left: 10px;">{{ acad.descripcion }}</div>
                 </div>
             {% endfor %}
         </div>
@@ -96,8 +105,8 @@
             <table style="width: 100%;">
                 {% for curso in cursos %}
                     {% if forloop.counter0|divisibleby:2 %}<tr>{% endif %}
-                        <td style="width: 50%; padding-bottom: 5px;">
-                            • {{ curso.nombrecurso }} ({{ curso.totalhoras }}h)
+                        <td style="width: 50%; padding-bottom: 4px;">
+                            <span style="color: #0d6efd;">&bull;</span> {{ curso.nombrecurso }} ({{ curso.totalhoras }}h)
                         </td>
                     {% if forloop.counter|divisibleby:2 or forloop.last %}</tr>{% endif %}
                 {% endfor %}
@@ -108,7 +117,7 @@
             <div class="titulo-seccion">Logros y Reconocimientos</div>
             {% for rec in reconocimientos %}
                 <div style="margin-bottom: 8px;">
-                    <strong>{{ rec.tiporeconocimiento }}:</strong> {{ rec.descripcionreconocimiento }}
+                    <span class="item-titulo">{{ rec.tiporeconocimiento }}:</span> {{ rec.descripcionreconocimiento }}
                     <div class="fecha">{{ rec.entidadpatrocinadora }} - {{ rec.fechareconocimiento|date:"Y" }}</div>
                 </div>
             {% endfor %}

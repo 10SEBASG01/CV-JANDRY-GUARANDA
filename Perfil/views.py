@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.template.loader import get_template
 from django.conf import settings
 
-# Librerías para el PDF (Asegúrate de haber hecho pip install xhtml2pdf PyPDF2)
+# Librerías necesarias (pip install xhtml2pdf PyPDF2)
 from xhtml2pdf import pisa
 from PyPDF2 import PdfMerger
 
@@ -17,11 +17,9 @@ from .models import (
 )
 
 def get_active_profile():
-    """Función auxiliar para obtener el perfil marcado como activo."""
     return DatosPersonales.objects.filter(perfilactivo=1).first()
 
-# --- VISTAS DE NAVEGACIÓN ---
-
+# --- TUS VISTAS DE SIEMPRE ---
 def home(request):
     perfil = get_active_profile()
     context = {
@@ -65,8 +63,7 @@ def garage(request):
     datos = VentaGarage.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
     return render(request, 'garage.html', {'datos': datos, 'perfil': perfil})
 
-# --- VISTA DE EXPORTACIÓN (LA ENGRAPADORA) ---
-
+# --- LA FUNCIÓN QUE UNE LOS PDFS ---
 def exportar_cv_completo(request):
     perfil = get_active_profile()
     context = {
@@ -78,34 +75,34 @@ def exportar_cv_completo(request):
         'laborales': ProductosLaborales.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
     }
 
-    # 1. Generar la primera página (Hoja de Vida de texto)
+    # 1. Crear la primera página (Texto)
     template = get_template('cv_pdf_maestro.html')
     html = template.render(context)
     pdf_texto = io.BytesIO()
     pisa.CreatePDF(io.BytesIO(html.encode("UTF-8")), dest=pdf_texto)
 
-    # 2. Unir con los archivos adjuntos
+    # 2. Iniciar el "Unidor" (Merger)
     merger = PdfMerger()
     pdf_texto.seek(0)
     merger.append(pdf_texto)
 
-    # Pegar certificados de CURSOS
-    for curso in context['cursos']:
-        if curso.rutacertificado:
+    # 3. PEGAR LOS PDFS DE CURSOS
+    for c in context['cursos']:
+        if c.rutacertificado:
             try:
-                merger.append(curso.rutacertificado.path)
+                merger.append(c.rutacertificado.path) # Aquí busca el archivo real
             except:
                 continue
 
-    # Pegar certificados de RECONOCIMIENTOS
-    for rec in context['reconocimientos']:
-        if rec.rutacertificado:
+    # 4. PEGAR LOS PDFS DE RECONOCIMIENTOS
+    for r in context['reconocimientos']:
+        if r.rutacertificado:
             try:
-                merger.append(rec.rutacertificado.path)
+                merger.append(r.rutacertificado.path)
             except:
                 continue
 
-    # 3. Generar la respuesta para el navegador
+    # 5. Respuesta final
     output = io.BytesIO()
     merger.write(output)
     merger.close()
@@ -113,4 +110,4 @@ def exportar_cv_completo(request):
 
     response = HttpResponse(output.read(), content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="Portafolio_{perfil.apellidos}.pdf"'
-    return response
+    return response 
