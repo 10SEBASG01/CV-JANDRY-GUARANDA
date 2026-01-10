@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.template.loader import get_template
 from django.conf import settings
 
-# Librerías necesarias (pip install xhtml2pdf PyPDF2)
+# Librerías para PDF
 from xhtml2pdf import pisa
 from PyPDF2 import PdfMerger
 
@@ -17,10 +17,12 @@ from Perfil.models import (
 )
 
 def get_active_profile():
+    """Obtiene el perfil marcado como activo."""
     return DatosPersonales.objects.filter(perfilactivo=1).first()
 
-# FUNCIÓN ESENCIAL PARA RENDER: Traduce URLs a rutas físicas para el PDF
+# FUNCIÓN CRÍTICA PARA IMÁGENES EN RENDER
 def link_callback(uri, rel):
+    """Convierte URLs de media/static en rutas físicas para xhtml2pdf."""
     if uri.startswith(settings.MEDIA_URL):
         path = os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, ""))
     elif uri.startswith(settings.STATIC_URL):
@@ -29,7 +31,8 @@ def link_callback(uri, rel):
         return uri
     return path
 
-# --- VISTAS ---
+# --- VISTAS DE NAVEGACIÓN (Las que faltaban y causaban el error) ---
+
 def home(request):
     perfil = get_active_profile()
     context = {
@@ -43,6 +46,38 @@ def home(request):
     }
     return render(request, 'home.html', context)
 
+def experiencia(request):
+    perfil = get_active_profile()
+    datos = ExperienciaLaboral.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
+    return render(request, 'experiencia.html', {'datos': datos, 'perfil': perfil})
+
+def productos_academicos(request):
+    perfil = get_active_profile()
+    datos = ProductosAcademicos.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
+    return render(request, 'productos_academicos.html', {'datos': datos, 'perfil': perfil})
+
+def productos_laborales(request):
+    perfil = get_active_profile()
+    datos = ProductosLaborales.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True).order_by('-fechaproducto')
+    return render(request, 'productos_laborales.html', {'datos': datos, 'perfil': perfil})
+
+def cursos(request):
+    perfil = get_active_profile()
+    datos = CursosRealizados.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
+    return render(request, 'cursos.html', {'datos': datos, 'perfil': perfil})
+
+def reconocimientos(request):
+    perfil = get_active_profile()
+    datos = Reconocimientos.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True).order_by('-fechareconocimiento')
+    return render(request, 'reconocimientos.html', {'datos': datos, 'perfil': perfil})
+
+def garage(request):
+    perfil = get_active_profile()
+    datos = VentaGarage.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
+    return render(request, 'garage.html', {'datos': datos, 'perfil': perfil})
+
+# --- FUNCIÓN DE EXPORTACIÓN (PDF + IMAGEN + CERTIFICADOS) ---
+
 def exportar_cv_completo(request):
     perfil = get_active_profile()
     context = {
@@ -54,40 +89,38 @@ def exportar_cv_completo(request):
         'laborales': ProductosLaborales.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
     }
 
-    # 1. Generar Hoja Maestra (Texto + Foto)
+    # 1. Generar Hoja Maestra (CV con foto)
     template = get_template('cv_pdf_maestro.html')
     html = template.render(context)
     pdf_texto = io.BytesIO()
     
-    # Se incluye el link_callback para que la foto no falle
     pisa.CreatePDF(
         io.BytesIO(html.encode("UTF-8")), 
         dest=pdf_texto,
         link_callback=link_callback
     )
 
+    # 2. Unir Certificados
     merger = PdfMerger()
     pdf_texto.seek(0)
     merger.append(pdf_texto)
 
-    # Función para adjuntar archivos binarios (Evita NotImplementedError)
-    def adjuntar(campo):
+    def adjuntar_seguro(campo):
         if campo and campo.name.lower().endswith('.pdf'):
             try:
-                # Abrimos el archivo directamente desde el storage
-                with campo.open(mode='rb') as archivo:
-                    merger.append(io.BytesIO(archivo.read()))
+                # Lectura binaria directa para evitar errores de ruta en Render
+                with campo.open(mode='rb') as f:
+                    merger.append(io.BytesIO(f.read()))
             except Exception as e:
-                print(f"Error al adjuntar: {e}")
+                print(f"No se pudo adjuntar un archivo: {e}")
 
-    # 2. Adjuntar SOLO Cursos y Reconocimientos al final
+    # Adjuntar certificados de cursos y reconocimientos al final
     for curso in context['cursos']:
-        adjuntar(curso.rutacertificado)
-
+        adjuntar_seguro(curso.rutacertificado)
     for rec in context['reconocimientos']:
-        adjuntar(rec.rutacertificado)
+        adjuntar_seguro(rec.rutacertificado)
 
-    # 3. Respuesta final
+    # 3. Respuesta Final
     output = io.BytesIO()
     merger.write(output)
     merger.close()
