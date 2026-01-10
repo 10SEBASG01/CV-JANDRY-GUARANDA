@@ -40,7 +40,17 @@
         border-radius: 12px; 
         padding: 10px; 
         box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-        height: 750px;
+        height: 600px; /* Reducido un poco para que quepa la descripción abajo */
+    }
+
+    /* ESTILO DE LA CAJA DE DESCRIPCIÓN (Igual a Reconocimientos) */
+    .description-box {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        border-left: 5px solid #198754;
+        margin-top: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
 
     .btn-cv-style {
@@ -69,10 +79,10 @@
 </div>
 
 <div class="row">
-    <div class="col-md-4" style="max-height: 750px; overflow-y: auto;">
+    <div class="col-md-4" style="max-height: 850px; overflow-y: auto;">
         {% for curso in datos %}
         <div class="card course-card shadow-sm" 
-             onclick="verPDF('{{ curso.rutacertificado.url }}')">
+             onclick="verPDF('{{ curso.rutacertificado.url }}', '{{ curso.descripcion|escapejs }}')">
             <div class="card-body">
                 <h6 class="fw-bold mb-1 text-truncate-custom">{{ curso.nombrecurso }}</h6>
                 <p class="text-success small mb-1"><b>{{ curso.entidadpatrocinadora }}</b></p>
@@ -101,15 +111,33 @@
                 </div>
             {% endif %}
         </div>
+
+        <div id="descContainer" class="description-box shadow-sm {% if not datos %}d-none{% endif %}">
+            <h5 class="fw-bold text-dark mb-2">Detalle del Curso</h5>
+            <p id="cursoDescripcion" class="text-muted mb-0" style="text-align: justify;">
+                {% if datos %}{{ datos.0.descripcion }}{% endif %}
+            </p>
+        </div>
     </div>
 </div>
 
 <script>
-    function verPDF(urlCertificado) {
-        // Solo cambia el visor del PDF individual
+    function verPDF(urlCertificado, descripcion) {
+        // 1. Cambia el PDF
         const visor = document.getElementById('pdfEmbed');
         if (visor) {
             visor.src = urlCertificado + "#toolbar=0&navpanes=0";
+        }
+
+        // 2. Cambia la descripción dinámicamente
+        const descCont = document.getElementById('descContainer');
+        const descTexto = document.getElementById('cursoDescripcion');
+        
+        if (descripcion && descripcion !== 'None' && descripcion !== '') {
+            descTexto.innerText = descripcion;
+            descCont.classList.remove('d-none');
+        } else {
+            descCont.classList.add('d-none'); // Se oculta si no hay descripción
         }
     }
 </script>
