@@ -80,48 +80,62 @@ def exportar_cv_completo(request):
         'laborales': ProductosLaborales.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
     }
 
-    # 1. Generar la hoja principal (CV en formato texto/diseño)
+def exportar_cv_completo(request):
+    perfil = get_active_profile()
+    
+    context = {
+        'perfil': perfil,
+        'experiencias': ExperienciaLaboral.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
+        'cursos': CursosRealizados.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
+        'reconocimientos': Reconocimientos.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
+        'academicos': ProductosAcademicos.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
+        'laborales': ProductosLaborales.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
+    }
+
+    # 1. Crear la primera página (Tu CV diseñado)
     template = get_template('cv_pdf_maestro.html')
     html = template.render(context)
     pdf_texto = io.BytesIO()
     pisa.CreatePDF(io.BytesIO(html.encode("UTF-8")), dest=pdf_texto)
 
-    # 2. Inicializar el unidor de PDFs (Merger)
+    # 2. Preparar el Merger
     merger = PdfMerger()
     pdf_texto.seek(0)
     merger.append(pdf_texto)
 
-    # 3. Adjuntar certificados físicos (Solo si son archivos PDF existentes)
-    # Lista de categorías que tienen campo 'rutacertificado'
-    categorias_con_pdf = [
-        context['experiencias'],
-        context['cursos'],
-        context['reconocimientos']
-    ]
+    # 3. Función auxiliar para intentar abrir archivos de varias formas
+    def agregar_pdf(campo_archivo):
+        if campo_archivo:
+            try:
+                # Intento 1: Abrir el archivo directamente desde el almacenamiento de Django
+                # Esto es más seguro que usar .path
+                archivo_abierto = campo_archivo.open(mode='rb')
+                merger.append(io.BytesIO(archivo_abierto.read()))
+                archivo_abierto.close()
+                return True
+            except Exception as e:
+                print(f"Error al abrir archivo: {e}")
+        return False
 
-    for categoria in categorias_con_pdf:
-        for item in categoria:
-            if item.rutacertificado:
-                # Verificamos que sea un PDF y que el archivo exista en el disco
-                nombre_archivo = item.rutacertificado.name.lower()
-                if nombre_archivo.endswith('.pdf'):
-                    try:
-                        ruta_fisica = item.rutacertificado.path
-                        if os.path.exists(ruta_fisica):
-                            merger.append(ruta_fisica)
-                    except Exception as e:
-                        print(f"No se pudo adjuntar el archivo: {e}")
-                        continue
+    # 4. RECORRER Y PEGAR (Ordenado al final)
+    # Primero certificados de Experiencia
+    for exp in context['experiencias']:
+        agregar_pdf(exp.rutacertificado)
 
-    # 4. Construir el archivo final
+    # Luego certificados de Cursos
+    for curso in context['cursos']:
+        agregar_pdf(curso.rutacertificado)
+
+    # Luego Reconocimientos
+    for rec in context['reconocimientos']:
+        agregar_pdf(rec.rutacertificado)
+
+    # 5. Generar Salida
     output = io.BytesIO()
     merger.write(output)
     merger.close()
     output.seek(0)
 
-    # 5. Retornar el PDF al navegador
     response = HttpResponse(output.read(), content_type='application/pdf')
-    filename = f"Portafolio_{perfil.apellidos}_{perfil.nombres}.pdf"
-    response['Content-Disposition'] = f'inline; filename="{filename}"'
-    
+    response['Content-Disposition'] = f'inline; filename="Portafolio_{perfil.apellidos}.pdf"'
     return response
