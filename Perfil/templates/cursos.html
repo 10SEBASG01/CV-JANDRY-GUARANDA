@@ -21,7 +21,7 @@
         margin-bottom: 1rem; 
     }
     
-    .course-card:hover { 
+    .course-card:hover, .course-card.active { 
         border-left: 5px solid #198754; 
         transform: translateX(5px); 
         box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
@@ -36,14 +36,21 @@
     }
 
     .viewer-container { 
-        background: white; 
+        background: #2b2b2b; /* Oscuro como en reconocimientos */
         border-radius: 12px; 
         padding: 10px; 
         box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
         height: 600px; 
     }
 
-    /* Caja de detalle igual a Reconocimientos */
+    .pdf-frame {
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+        background: white;
+    }
+
+    /* Caja de descripción igual a Reconocimientos */
     .description-box {
         background: white;
         padding: 1.5rem;
@@ -79,10 +86,10 @@
 </div>
 
 <div class="row">
-    <div class="col-md-4" style="max-height: 800px; overflow-y: auto;">
+    <div class="col-md-4" style="max-height: 850px; overflow-y: auto;">
         {% for curso in datos %}
-        <div class="card course-card shadow-sm" 
-             onclick="verDetalle('{{ curso.rutacertificado.url }}', '{{ curso.descripcion|escapejs }}')">
+        <div class="card course-card shadow-sm {% if forloop.first %}active{% endif %}" 
+             onclick="cambiarCurso('{{ curso.rutacertificado.url }}', '{{ curso.descripcioncurso|escapejs }}', this)">
             <div class="card-body">
                 <h6 class="fw-bold mb-1 text-truncate-custom">{{ curso.nombrecurso }}</h6>
                 <p class="text-success small mb-1"><b>{{ curso.entidadpatrocinadora }}</b></p>
@@ -98,48 +105,47 @@
     </div>
 
     <div class="col-md-8">
-        <div class="viewer-container border">
+        <div class="viewer-container">
             {% if datos %}
-                <embed id="pdfEmbed" 
-                        src="{{ datos.0.rutacertificado.url }}#toolbar=0&navpanes=0" 
-                        type="application/pdf" 
-                        width="100%" 
-                        height="100%" />
+                <object id="pdfVisor" data="{{ datos.0.rutacertificado.url }}#toolbar=0" type="application/pdf" class="pdf-frame">
+                    <p class="text-white text-center p-5">Visualización no disponible. <a href="{{ datos.0.rutacertificado.url }}">Descargar aquí</a></p>
+                </object>
             {% else %}
                 <div class="h-100 d-flex align-items-center justify-content-center bg-light rounded">
-                    <p class="text-muted">Selecciona un curso para ver el detalle</p>
+                    <p class="text-muted">Selecciona un curso para ver el certificado</p>
                 </div>
             {% endif %}
         </div>
 
         <div id="descContainer" class="description-box shadow-sm {% if not datos %}d-none{% endif %}">
-            <h5 class="fw-bold text-dark mb-2">Detalle del Curso</h5>
-            <p id="cursoDescripcion" class="text-muted mb-0" style="text-align: justify;">
-                {% if datos %}{{ datos.0.descripcion }}{% endif %}
+            <h4 class="fw-bold text-dark mb-3">Detalle del Curso</h4>
+            <p id="cursoDescripcion" class="text-muted lh-lg" style="font-size: 1.1rem; text-align: justify;">
+                {% if datos %}{{ datos.0.descripcioncurso }}{% endif %}
             </p>
         </div>
     </div>
 </div>
 
 <script>
-    // CAMBIO CLAVE: Función actualizada para recibir y mostrar la descripción
-    function verDetalle(urlCertificado, descripcion) {
-        // 1. Cambia el PDF
-        const visor = document.getElementById('pdfEmbed');
-        if (visor) {
-            visor.src = urlCertificado + "#toolbar=0&navpanes=0";
-        }
-
-        // 2. Cambia el texto de la descripción
-        const descCont = document.getElementById('descContainer');
-        const descTexto = document.getElementById('cursoDescripcion');
+    function cambiarCurso(urlCert, textoLargo, elemento) {
+        // 1. Actualizar Visor (usando setAttribute para <object>)
+        const visor = document.getElementById('pdfVisor');
+        if(visor) visor.setAttribute('data', urlCert + "#toolbar=0");
         
-        if (descripcion && descripcion !== 'None' && descripcion !== '') {
-            descTexto.innerText = descripcion;
+        // 2. Actualizar el texto de la descripción (Usando el campo correcto descripcioncurso)
+        const descTexto = document.getElementById('cursoDescripcion');
+        const descCont = document.getElementById('descContainer');
+        
+        if (textoLargo && textoLargo !== 'None' && textoLargo !== '') {
+            descTexto.innerText = textoLargo;
             descCont.classList.remove('d-none');
         } else {
             descCont.classList.add('d-none');
         }
+
+        // 3. Actualizar estado visual de las tarjetas
+        document.querySelectorAll('.course-card').forEach(card => card.classList.remove('active'));
+        elemento.classList.add('active');
     }
 </script>
 {% endblock %}
