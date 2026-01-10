@@ -92,45 +92,44 @@ def exportar_cv_completo(request):
         'laborales': ProductosLaborales.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
     }
 
-    # 1. Crear la primera página (Tu CV diseñado)
+def exportar_cv_completo(request):
+    perfil = get_active_profile()
+    context = {
+        'perfil': perfil,
+        'experiencias': ExperienciaLaboral.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
+        'cursos': CursosRealizados.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
+        'reconocimientos': Reconocimientos.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
+        'academicos': ProductosAcademicos.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
+        'laborales': ProductosLaborales.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
+    }
+
+    # 1. Generar Hoja Maestra
     template = get_template('cv_pdf_maestro.html')
     html = template.render(context)
     pdf_texto = io.BytesIO()
     pisa.CreatePDF(io.BytesIO(html.encode("UTF-8")), dest=pdf_texto)
 
-    # 2. Preparar el Merger
     merger = PdfMerger()
     pdf_texto.seek(0)
     merger.append(pdf_texto)
 
-    # 3. Función auxiliar para intentar abrir archivos de varias formas
-    def agregar_pdf(campo_archivo):
-        if campo_archivo:
+    # Función para adjuntar archivos de forma segura
+    def adjuntar(campo):
+        if campo and campo.name.lower().endswith('.pdf'):
             try:
-                # Intento 1: Abrir el archivo directamente desde el almacenamiento de Django
-                # Esto es más seguro que usar .path
-                archivo_abierto = campo_archivo.open(mode='rb')
-                merger.append(io.BytesIO(archivo_abierto.read()))
-                archivo_abierto.close()
-                return True
-            except Exception as e:
-                print(f"Error al abrir archivo: {e}")
-        return False
+                archivo = campo.open(mode='rb')
+                merger.append(io.BytesIO(archivo.read()))
+                archivo.close()
+            except: pass
 
-    # 4. RECORRER Y PEGAR (Ordenado al final)
-    # Primero certificados de Experiencia
-    for exp in context['experiencias']:
-        agregar_pdf(exp.rutacertificado)
-
-    # Luego certificados de Cursos
+    # 2. Adjuntar SOLO Cursos y Reconocimientos (Al final del documento)
     for curso in context['cursos']:
-        agregar_pdf(curso.rutacertificado)
+        adjuntar(curso.rutacertificado)
 
-    # Luego Reconocimientos
     for rec in context['reconocimientos']:
-        agregar_pdf(rec.rutacertificado)
+        adjuntar(rec.rutacertificado)
 
-    # 5. Generar Salida
+    # 3. Respuesta
     output = io.BytesIO()
     merger.write(output)
     merger.close()

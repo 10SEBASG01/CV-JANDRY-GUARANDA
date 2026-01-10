@@ -11,87 +11,92 @@
             line-height: 1.4;
         }
         .container { width: 100%; }
+        
+        /* Layout del Header con Foto */
+        .header-table { width: 100%; margin-bottom: 20px; border-bottom: 2px solid #0d6efd; padding-bottom: 10px; }
+        .foto-perfil { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; }
+        .info-header { padding-left: 20px; text-align: left; }
+        
+        .nombre { font-size: 22px; font-weight: bold; color: #000; text-transform: uppercase; }
+        .subtitulo { font-size: 14px; color: #0d6efd; font-weight: bold; margin-bottom: 5px; }
+        .contacto { color: #666; font-size: 9px; }
+
         .titulo-seccion { 
-            border-bottom: 1pt solid #0d6efd; 
+            background-color: #f8f9fa;
+            border-left: 4pt solid #0d6efd; 
             color: #0d6efd; 
             font-weight: bold; 
             text-transform: uppercase; 
-            padding-bottom: 2px;
+            padding: 5px 10px;
             margin-bottom: 8px; 
             font-size: 11px;
             margin-top: 15px;
         }
-        .header-cv { text-align: center; margin-bottom: 20px; }
-        .nombre { font-size: 20px; font-weight: bold; color: #000; }
-        .subtitulo { font-size: 13px; color: #0d6efd; margin-bottom: 5px; }
-        .contacto { color: #666; font-size: 9px; }
         .item-titulo { font-weight: bold; color: #000; }
         .fecha { color: #666; font-style: italic; font-size: 9px; }
         table { width: 100%; border-collapse: collapse; }
-        .tabla-item { margin-bottom: 10px; width: 100%; }
+        .tabla-item { margin-bottom: 8px; width: 100%; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header-cv">
-            <div class="nombre">{{ perfil.nombres }} {{ perfil.apellidos }}</div>
-            <div class="subtitulo">{{ perfil.descripcionperfil }}</div>
-            <div class="contacto">
-                {{ perfil.email_contacto }} | {{ perfil.telefonofijo }} | {{ perfil.direcciondomiciliaria }}
-                {% if perfil.sitioweb %}<br>{{ perfil.sitioweb }}{% endif %}
-            </div>
-        </div>
+        <table class="header-table">
+            <tr>
+                <td style="width: 110px;">
+                    {% if perfil.fotoperfil %}
+                        <img src="{{ perfil.fotoperfil.path }}" class="foto-perfil">
+                    {% endif %}
+                </td>
+                <td class="info-header">
+                    <div class="nombre">{{ perfil.nombres }} {{ perfil.apellidos }}</div>
+                    <div class="subtitulo">{{ perfil.descripcionperfil }}</div>
+                    <div class="contacto">
+                        <strong>Email:</strong> {{ perfil.email_contacto }} | <strong>Tel:</strong> {{ perfil.telefonofijo }}<br>
+                        <strong>Dir:</strong> {{ perfil.direcciondomiciliaria }}
+                        {% if perfil.sitioweb %}<br><strong>Web:</strong> {{ perfil.sitioweb }}{% endif %}
+                    </div>
+                </td>
+            </tr>
+        </table>
 
         <div class="titulo-seccion">Experiencia Laboral</div>
         {% for exp in experiencias %}
             <table class="tabla-item">
                 <tr>
                     <td class="item-titulo">{{ exp.cargodesempenado }}</td>
-                    <td style="text-align: right;" class="fecha">
-                        {{ exp.fechainiciogestion }} - {{ exp.fechafingestion|default:"Actualidad" }}
-                    </td>
+                    <td style="text-align: right;" class="fecha">{{ exp.fechainiciogestion }} - {{ exp.fechafingestion|default:"Actualidad" }}</td>
                 </tr>
-                <tr>
-                    <td colspan="2" style="color: #444; font-weight: bold;">{{ exp.nombrempresa }} | {{ exp.lugarempresa }}</td>
-                </tr>
-                <tr>
-                    <td colspan="2" style="padding-top: 3px; text-align: justify;">{{ exp.descripcionfunciones }}</td>
-                </tr>
+                <tr><td colspan="2" style="color: #444; font-weight: bold;">{{ exp.nombrempresa }} | {{ exp.lugarempresa }}</td></tr>
+                <tr><td colspan="2" style="padding-top: 2px; text-align: justify;">{{ exp.descripcionfunciones }}</td></tr>
             </table>
         {% endfor %}
 
-        <div class="titulo-seccion">Productos Laborales</div>
+        <div class="titulo-seccion">Productos Académicos y Laborales</div>
         {% for lab in laborales %}
-            <div style="margin-bottom: 8px;">
-                <span class="item-titulo">• {{ lab.nombreproducto }}</span>
-                {% if lab.fechaproducto %}<span class="fecha">({{ lab.fechaproducto|date:"Y" }})</span>{% endif %}
-                <div style="padding-left: 10px; text-align: justify;">{{ lab.descripcion }}</div>
+            <div style="margin-bottom: 5px;">
+                <span class="item-titulo">• {{ lab.nombreproducto }}</span> (Laboral)
+                <div style="padding-left: 10px;">{{ lab.descripcion }}</div>
             </div>
         {% endfor %}
-
-        <div class="titulo-seccion">Productos Académicos</div>
         {% for acad in academicos %}
-            <div style="margin-bottom: 8px;">
-                <span class="item-titulo">• {{ acad.nombrerecurso }}</span> 
-                <span class="fecha">({{ acad.clasificador }})</span>
-                <div style="padding-left: 10px; text-align: justify;">{{ acad.descripcion }}</div>
+            <div style="margin-bottom: 5px;">
+                <span class="item-titulo">• {{ acad.nombrerecurso }}</span> (Académico)
+                <div style="padding-left: 10px;">{{ acad.descripcion }}</div>
             </div>
         {% endfor %}
 
-        <div class="titulo-seccion">Cursos y Certificaciones</div>
+        <div class="titulo-seccion">Cursos y Certificaciones Realizadas</div>
         <table style="width: 100%;">
             {% for curso in cursos %}
                 {% if forloop.counter0|divisibleby:2 %}<tr>{% endif %}
-                    <td style="width: 50%; padding-bottom: 3px;">
-                        • {{ curso.nombrecurso }} ({{ curso.totalhoras }}h)
-                    </td>
+                    <td style="width: 50%; padding-bottom: 3px;">• {{ curso.nombrecurso }} ({{ curso.totalhoras }}h)</td>
                 {% if forloop.counter|divisibleby:2 or forloop.last %}</tr>{% endif %}
             {% endfor %}
         </table>
 
-        <div class="titulo-seccion">Logros y Reconocimientos</div>
+        <div class="titulo-seccion">Reconocimientos y Logros</div>
         {% for rec in reconocimientos %}
-            <div style="margin-bottom: 8px;">
+            <div style="margin-bottom: 5px;">
                 <span class="item-titulo">{{ rec.tiporeconocimiento }}:</span> {{ rec.descripcionreconocimiento }}
                 <div class="fecha">{{ rec.entidadpatrocinadora }} - {{ rec.fechareconocimiento|date:"Y" }}</div>
             </div>
