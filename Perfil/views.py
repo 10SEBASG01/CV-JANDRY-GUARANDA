@@ -7,7 +7,6 @@ from django.conf import settings
 from xhtml2pdf import pisa
 from PyPDF2 import PdfMerger
 
-# Importación de tus modelos
 from Perfil.models import (
     DatosPersonales, ExperienciaLaboral, 
     CursosRealizados, VentaGarage,
@@ -18,7 +17,6 @@ def get_active_profile():
     return DatosPersonales.objects.filter(perfilactivo=1).first()
 
 def link_callback(uri, rel):
-    """Manejo de rutas para Render"""
     if uri.startswith(settings.MEDIA_URL):
         path = os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, ""))
     elif uri.startswith(settings.STATIC_URL):
@@ -27,11 +25,10 @@ def link_callback(uri, rel):
         return uri
     return path
 
-# --- VISTAS DE NAVEGACIÓN ---
+# --- VISTAS DE NAVEGACIÓN (Mantener todas para que urls.py funcione) ---
 def home(request):
     perfil = get_active_profile()
-    context = {'perfil': perfil}
-    return render(request, 'home.html', context)
+    return render(request, 'home.html', {'perfil': perfil})
 
 def experiencia(request):
     perfil = get_active_profile()
@@ -63,7 +60,7 @@ def garage(request):
     datos = VentaGarage.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
     return render(request, 'garage.html', {'datos': datos, 'perfil': perfil})
 
-# --- FUNCIÓN MAESTRA DE PDF ---
+# --- EXPORTAR PDF ---
 def exportar_cv_completo(request):
     perfil = get_active_profile()
     context = {
@@ -75,43 +72,31 @@ def exportar_cv_completo(request):
         'laborales': ProductosLaborales.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
     }
 
+    # 1. Generar el PDF base (Ahora incluye los separadores visuales)
+    template = get_template('cv_pdf_maestro.html')
+    html = template.render(context)
+    pdf_base = io.BytesIO()
+    pisa.CreatePDF(io.BytesIO(html.encode("UTF-8")), dest=pdf_base, link_callback=link_callback)
+
     merger = PdfMerger()
+    pdf_base.seek(0)
+    merger.append(pdf_base)
 
-    # 1. Función para crear PDF desde HTML (CV y Separadores)
-    def crear_pdf_en_memoria(template_name, extra_context):
-        tmpl = get_template(template_name)
-        html_content = tmpl.render(extra_context)
-        result = io.BytesIO()
-        pisa.CreatePDF(io.BytesIO(html_content.encode("UTF-8")), dest=result, link_callback=link_callback)
-        result.seek(0)
-        return result
-
-    # 2. Agregar CV Principal
-    merger.append(crear_pdf_en_memoria('cv_pdf_maestro.html', context))
-
-    # 3. SECCIÓN DE CURSOS
-    cursos_con_pdf = [c for c in context['cursos'] if c.rutacertificado]
-    if cursos_con_pdf:
-        # Página separadora
-        merger.append(crear_pdf_en_memoria('separador_pdf.html', {'titulo': 'ANEXO: CERTIFICADOS DE CURSOS'}))
-        for curso in cursos_con_pdf:
+    # 2. Adjuntar los archivos reales (Certificados PDF)
+    def adjuntar_pdf(campo):
+        if campo and campo.name.lower().endswith('.pdf'):
             try:
-                with curso.rutacertificado.open(mode='rb') as f:
+                # Abrimos de forma binaria para Render
+                with campo.open(mode='rb') as f:
                     merger.append(io.BytesIO(f.read()))
             except: pass
 
-    # 4. SECCIÓN DE RECONOCIMIENTOS
-    recs_con_pdf = [r for r in context['reconocimientos'] if r.rutacertificado]
-    if recs_con_pdf:
-        # Página separadora
-        merger.append(crear_pdf_en_memoria('separador_pdf.html', {'titulo': 'ANEXO: LOGROS Y RECONOCIMIENTOS'}))
-        for rec in recs_con_pdf:
-            try:
-                with rec.rutacertificado.open(mode='rb') as f:
-                    merger.append(io.BytesIO(f.read()))
-            except: pass
+    for c in context['cursos']:
+        adjuntar_pdf(c.rutacertificado)
+    for r in context['reconocimientos']:
+        adjuntar_pdf(r.rutacertificado)
 
-    # 5. Respuesta
+    # 3. Enviar respuesta
     output = io.BytesIO()
     merger.write(output)
     merger.close()

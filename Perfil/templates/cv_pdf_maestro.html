@@ -5,8 +5,6 @@
     <style>
         @page { size: a4; margin: 1.5cm; }
         body { font-family: Helvetica, Arial, sans-serif; font-size: 10px; color: #333; line-height: 1.4; }
-        
-        /* Estilos CV Principal */
         .header-table { width: 100%; margin-bottom: 20px; border-bottom: 2px solid #0d6efd; padding-bottom: 10px; }
         .foto-perfil { width: 100px; height: 100px; border-radius: 50px; }
         .info-header { padding-left: 20px; vertical-align: middle; }
@@ -16,23 +14,15 @@
         .item-titulo { font-weight: bold; color: #000; }
         .fecha { color: #666; font-style: italic; font-size: 9px; }
         table { width: 100%; border-collapse: collapse; }
-
-        /* Estilos de los Separadores de Anexos */
-        .page-break { page-break-before: always; }
-        .separador-anexo {
-            background-color: #0d6efd;
-            color: white;
-            text-align: center;
-            padding-top: 10cm; /* Centrado vertical aproximado */
-            height: 25cm;
-            margin: -1.5cm; /* Compensa el margen del @page para llenar la hoja */
-        }
-        .separador-anexo h1 { 
-            font-size: 40px; 
-            text-transform: uppercase; 
-            border-bottom: 5px solid white; 
-            display: inline-block; 
-            padding-bottom: 10px; 
+        
+        /* Estilos para separar los anexos */
+        .salto-pagina { page-break-before: always; }
+        .portada-anexo { 
+            text-align: center; 
+            padding-top: 8cm; 
+            color: #0d6efd;
+            border: 10px solid #0d6efd;
+            height: 15cm;
         }
     </style>
 </head>
@@ -74,26 +64,18 @@
             {% endfor %}
         </table>
 
-        <div class="titulo-seccion">Reconocimientos</div>
-        {% for rec in reconocimientos %}
-            <div style="margin-bottom: 5px;">
-                <span class="item-titulo">{{ rec.tiporeconocimiento }}:</span> {{ rec.descripcionreconocimiento }}
-                <div class="fecha">{{ rec.entidadpatrocinadora }} - {{ rec.fechareconocimiento|date:"Y" }}</div>
-            </div>
-        {% endfor %}
-
         {% if cursos %}
-        <div class="page-break">
-            <div class="separador-anexo">
-                <h1>Anexo: Certificados</h1>
+        <div class="salto-pagina">
+            <div class="portada-anexo">
+                <h1 style="font-size: 40px;">ANEXO:<br>CERTIFICADOS DE CURSOS</h1>
             </div>
         </div>
         {% endif %}
 
         {% if reconocimientos %}
-        <div class="page-break">
-            <div class="separador-anexo">
-                <h1>Anexo: Reconocimientos</h1>
+        <div class="salto-pagina">
+            <div class="portada-anexo">
+                <h1 style="font-size: 40px;">ANEXO:<br>LOGROS Y RECONOCIMIENTOS</h1>
             </div>
         </div>
         {% endif %}
