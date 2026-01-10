@@ -3,15 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        @page {
-            size: a4;
-            margin: 1.5cm;
-        }
+        @page { size: a4; margin: 1.5cm; }
         body { 
             background-color: white; 
             font-family: Helvetica, Arial, sans-serif; 
             font-size: 10px; 
-            color: #333;
+            color: #333; 
             line-height: 1.4;
         }
         .container { width: 100%; }
@@ -22,18 +19,17 @@
             text-transform: uppercase; 
             padding-bottom: 2px;
             margin-bottom: 8px; 
-            font-size: 12px;
+            font-size: 11px;
             margin-top: 15px;
         }
         .header-cv { text-align: center; margin-bottom: 20px; }
         .nombre { font-size: 20px; font-weight: bold; color: #000; }
-        .subtitulo { font-size: 14px; color: #0d6efd; }
+        .subtitulo { font-size: 13px; color: #0d6efd; }
         .contacto { color: #666; font-size: 9px; }
         .item-titulo { font-weight: bold; color: #000; }
         .fecha { color: #666; font-style: italic; font-size: 9px; }
         table { width: 100%; border-collapse: collapse; }
-        /* Usamos tablas para evitar que el contenido se corte feo */
-        .tabla-item { margin-bottom: 10px; width: 100%; }
+        .tabla-item { margin-bottom: 8px; width: 100%; }
     </style>
 </head>
 <body>
@@ -51,16 +47,10 @@
             <table class="tabla-item">
                 <tr>
                     <td class="item-titulo">{{ exp.cargodesempenado }}</td>
-                    <td style="text-align: right;" class="fecha">
-                        {{ exp.fechainiciogestion }} - {{ exp.fechafingestion|default:"Actualidad" }}
-                    </td>
+                    <td style="text-align: right;" class="fecha">{{ exp.fechainiciogestion }} - {{ exp.fechafingestion|default:"Actualidad" }}</td>
                 </tr>
-                <tr>
-                    <td colspan="2" style="color: #444;">{{ exp.nombrempresa }} | {{ exp.lugarempresa }}</td>
-                </tr>
-                <tr>
-                    <td colspan="2" style="padding-top: 3px;">{{ exp.descripcionfunciones }}</td>
-                </tr>
+                <tr><td colspan="2" style="color: #444;">{{ exp.nombrempresa }} | {{ exp.lugarempresa }}</td></tr>
+                <tr><td colspan="2">{{ exp.descripcionfunciones }}</td></tr>
             </table>
         {% endfor %}
 
@@ -72,13 +62,20 @@
             </div>
         {% endfor %}
 
+        <div class="titulo-seccion">Productos Académicos</div>
+        {% for acad in academicos %}
+            <div style="margin-bottom: 5px;">
+                <span class="item-titulo">• {{ acad.nombrerecurso }}</span> 
+                <span class="fecha">({{ acad.clasificador }})</span>
+                <div style="padding-left: 10px;">{{ acad.descripcion }}</div>
+            </div>
+        {% endfor %}
+
         <div class="titulo-seccion">Cursos y Certificaciones</div>
         <table style="width: 100%;">
             {% for curso in cursos %}
                 {% if forloop.counter0|divisibleby:2 %}<tr>{% endif %}
-                    <td style="width: 50%; padding-bottom: 3px;">
-                        • {{ curso.nombrecurso }} ({{ curso.totalhoras }}h)
-                    </td>
+                    <td style="width: 50%; padding-bottom: 3px;">• {{ curso.nombrecurso }} ({{ curso.totalhoras }}h)</td>
                 {% if forloop.counter|divisibleby:2 or forloop.last %}</tr>{% endif %}
             {% endfor %}
         </table>
