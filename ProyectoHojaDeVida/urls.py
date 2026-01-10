@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from Perfil import views # Importamos tus vistas
+from Perfil import views 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -16,6 +16,5 @@ urlpatterns = [
     path('exportar-cv-completo/', views.exportar_cv_completo, name='exportar_cv'),
 ]
 
-# ESTO ES LO QUE HACE QUE EL NAVEGADOR PUEDA ABRIR TUS DIPLOMAS
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

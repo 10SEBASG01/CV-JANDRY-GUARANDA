@@ -2,88 +2,117 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Exportando CV...</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        body { background-color: white; font-family: 'Poppins', sans-serif; font-size: 12px; }
-        .seccion { margin-bottom: 25px; page-break-inside: avoid; }
-        .titulo-seccion { border-bottom: 2px solid #0d6efd; color: #0d6efd; font-weight: bold; text-transform: uppercase; margin-bottom: 15px; }
-        .header-cv { text-align: center; margin-bottom: 30px; border-bottom: 4px double #eee; padding-bottom: 20px; }
+        /* Estilos optimizados para xhtml2pdf */
+        @page {
+            size: a4;
+            margin: 1cm;
+        }
+        body { 
+            background-color: white; 
+            font-family: Helvetica, Arial, sans-serif; 
+            font-size: 11px; 
+            color: #333;
+            line-height: 1.4;
+        }
+        .container { width: 100%; }
+        .seccion { margin-bottom: 20px; }
+        .titulo-seccion { 
+            border-bottom: 2px solid #0d6efd; 
+            color: #0d6efd; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            padding-bottom: 5px;
+            margin-bottom: 10px; 
+            font-size: 14px;
+        }
+        .header-cv { 
+            text-align: center; 
+            margin-bottom: 25px; 
+            border-bottom: 1px solid #eee; 
+            padding-bottom: 15px; 
+        }
+        .nombre { font-size: 24px; font-weight: bold; margin: 0; color: #000; }
+        .subtitulo { font-size: 16px; color: #0d6efd; margin: 5px 0; }
+        .contacto { color: #666; font-size: 10px; }
+        .item-titulo { font-weight: bold; color: #000; }
+        .fecha { color: #666; font-style: italic; }
+        .texto-secundario { color: #555; }
+        table { width: 100%; border-collapse: collapse; }
+        td { vertical-align: top; padding: 2px 0; }
     </style>
 </head>
 <body>
-    <div id="cv-content" class="container py-4">
+    <div class="container">
         <div class="header-cv">
-            <h1 class="display-6 fw-bold">{{ perfil.nombres }} {{ perfil.apellidos }}</h1>
-            <p class="lead text-primary mb-1">{{ perfil.descripcionperfil }}</p>
-            <div class="text-muted">
+            <div class="nombre">{{ perfil.nombres }} {{ perfil.apellidos }}</div>
+            <div class="subtitulo">{{ perfil.descripcionperfil }}</div>
+            <div class="contacto">
                 {{ perfil.email_contacto }} | {{ perfil.telefonofijo }} | {{ perfil.direcciondomiciliaria }}
             </div>
         </div>
 
         <div class="seccion">
-            <h5 class="titulo-seccion">Experiencia Laboral</h5>
+            <div class="titulo-seccion">Experiencia Laboral</div>
             {% for exp in experiencias %}
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between">
-                        <strong>{{ exp.cargodesempenado }}</strong>
-                        <span class="text-muted">{{ exp.fechainiciogestion }} - {{ exp.fechafingestion|default:"Actualidad" }}</span>
-                    </div>
-                    <div>{{ exp.nombrempresa }} | {{ exp.lugarempresa }}</div>
-                    <p class="text-secondary">{{ exp.descripcionfunciones }}</p>
+                <div style="margin-bottom: 12px;">
+                    <table style="width: 100%;">
+                        <tr>
+                            <td class="item-titulo">{{ exp.cargodesempenado }}</td>
+                            <td style="text-align: right;" class="fecha">
+                                {{ exp.fechainiciogestion }} - {{ exp.fechafingestion|default:"Actualidad" }}
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="texto-secundario">{{ exp.nombrempresa }} | {{ exp.lugarempresa }}</div>
+                    <div style="margin-top: 4px;">{{ exp.descripcionfunciones }}</div>
                 </div>
             {% endfor %}
         </div>
 
         <div class="seccion">
-            <h5 class="titulo-seccion">Productos Académicos</h5>
+            <div class="titulo-seccion">Productos Laborales y Proyectos</div>
+            {% for lab in laborales %}
+                <div style="margin-bottom: 8px;">
+                    <span class="item-titulo">{{ lab.nombreproducto }}</span>
+                    {% if lab.fechaproducto %}<span class="fecha">({{ lab.fechaproducto|date:"Y" }})</span>{% endif %}
+                    <p style="margin: 2px 0;">{{ lab.descripcion }}</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="seccion">
+            <div class="titulo-seccion">Productos Académicos</div>
             {% for acad in academicos %}
-                <div class="mb-2">
-                    <strong>{{ acad.nombrerecurso }}</strong> ({{ acad.clasificador }})
-                    <p>{{ acad.descripcion }}</p>
+                <div style="margin-bottom: 8px;">
+                    <span class="item-titulo">{{ acad.nombrerecurso }}</span> ({{ acad.clasificador }})
+                    <p style="margin: 2px 0;">{{ acad.descripcion }}</p>
                 </div>
             {% endfor %}
         </div>
 
         <div class="seccion">
-            <h5 class="titulo-seccion">Cursos y Certificaciones</h5>
-            <div class="row">
+            <div class="titulo-seccion">Cursos y Certificaciones</div>
+            <table style="width: 100%;">
                 {% for curso in cursos %}
-                    <div class="col-6 mb-2">
-                        <i class="bi bi-patch-check"></i> {{ curso.nombrecurso }} ({{ curso.totalhoras }}h)
-                    </div>
+                    {% if forloop.counter0|divisibleby:2 %}<tr>{% endif %}
+                        <td style="width: 50%; padding-bottom: 5px;">
+                            • {{ curso.nombrecurso }} ({{ curso.totalhoras }}h)
+                        </td>
+                    {% if forloop.counter|divisibleby:2 or forloop.last %}</tr>{% endif %}
                 {% endfor %}
-            </div>
+            </table>
         </div>
 
         <div class="seccion">
-            <h5 class="titulo-seccion">Logros y Reconocimientos</h5>
+            <div class="titulo-seccion">Logros y Reconocimientos</div>
             {% for rec in reconocimientos %}
-                <div class="mb-2">
+                <div style="margin-bottom: 8px;">
                     <strong>{{ rec.tiporeconocimiento }}:</strong> {{ rec.descripcionreconocimiento }}
-                    <small class="d-block text-muted">{{ rec.entidadpatrocinadora }} - {{ rec.fechareconocimiento|date:"Y" }}</small>
+                    <div class="fecha">{{ rec.entidadpatrocinadora }} - {{ rec.fechareconocimiento|date:"Y" }}</div>
                 </div>
             {% endfor %}
         </div>
     </div>
-
-    <script>
-        window.onload = function() {
-            const element = document.getElementById('cv-content');
-            const opt = {
-                margin: 10,
-                filename: 'CV_{{ perfil.nombres }}_{{ perfil.apellidos }}.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 3, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(element).save().then(() => {
-                // Pequeño delay para que el usuario vea que se descargó y luego cerrar
-                setTimeout(() => { window.close(); }, 1000);
-            });
-        };
-    </script>
 </body>
 </html>
