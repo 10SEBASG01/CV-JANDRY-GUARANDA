@@ -13,7 +13,8 @@ urlpatterns = [
     path('cursos/', views.cursos, name='cursos'),
     path('reconocimientos/', views.reconocimientos, name='reconocimientos'),
     path('garage/', views.garage, name='garage'),
-    path('exportar-cv-completo/', views.exportar_cv_completo, name='exportar_cv'),
+    # Esta línea debe usar el nombre exacto que definimos en views.py
+    path('exportar-cv-completo/', views.pdf_datos_personales, name='exportar_cv'),
 ]
 
 if settings.DEBUG:

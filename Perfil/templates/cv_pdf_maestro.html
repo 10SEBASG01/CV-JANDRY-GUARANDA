@@ -1,31 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
     <style>
-        @page { size: letter; margin: 1.5cm; }
-        body { font-family: Helvetica, sans-serif; color: #333; line-height: 1.2; }
+        /* Configuraciones de página para xhtml2pdf */
+        @page { 
+            size: letter; 
+            margin: 1.5cm; 
+        }
+        body { 
+            font-family: Helvetica, Arial, sans-serif; 
+            color: #333; 
+            line-height: 1.2; 
+            font-size: 10pt;
+        }
+        
+        /* Encabezado */
         .header { width: 100%; border-bottom: 2px solid #004085; padding-bottom: 10px; margin-bottom: 20px; }
-        .name { font-size: 26pt; font-weight: bold; text-transform: uppercase; color: #004085; }
-        .section-title { font-weight: bold; text-transform: uppercase; font-size: 12pt; margin-top: 25px; color: #004085; border-bottom: 1px solid #004085; padding-bottom: 3px; }
-        .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .label { font-weight: bold; font-size: 9pt; color: #333; width: 35%; padding: 4px 0; }
-        .value { font-size: 10pt; padding: 4px 0; }
-        .exp-container { margin-top: 15px; padding-bottom: 10px; }
-        .job-title { font-weight: bold; font-size: 11pt; color: #333; }
-        .company-info { font-weight: bold; font-size: 10pt; color: #004085; margin-top: 2px; }
-        .date-location { font-size: 9pt; color: #666; font-style: italic; margin-top: 2px; }
-        .exp-desc { font-size: 10pt; margin-top: 8px; text-align: justify; line-height: 1.4; }
+        .name { font-size: 24pt; font-weight: bold; text-transform: uppercase; color: #004085; }
+        .contact-info { font-size: 9pt; color: #555; margin-top: 5px; }
+        
+        /* Secciones */
+        .section-title { 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            font-size: 12pt; 
+            margin-top: 20px; 
+            color: #004085; 
+            border-bottom: 1px solid #004085; 
+            padding-bottom: 3px; 
+            margin-bottom: 10px;
+        }
+        
+        /* Tablas de datos */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .label { font-weight: bold; width: 30%; padding: 3px 0; color: #444; }
+        .value { width: 70%; padding: 3px 0; }
+        
+        /* Contenedores de ítems */
+        .item-container { margin-bottom: 12px; }
+        .item-title { font-weight: bold; font-size: 11pt; color: #000; }
+        .item-subtitle { font-weight: bold; color: #004085; font-size: 10pt; }
+        .item-date { font-size: 9pt; color: #666; font-style: italic; }
+        .item-desc { margin-top: 5px; text-align: justify; line-height: 1.3; }
+        
+        /* Foto */
+        .photo-box { text-align: right; }
         .photo { width: 100px; height: auto; border: 1px solid #ccc; }
     </style>
 </head>
 <body>
     <table class="header">
         <tr>
-            <td width="75%">
-                <div class="name">{{ perfil.nombres }} {{ perfil.apellidos }}</div>
-                <div style="margin-top: 5px; font-size: 10pt; color: #333;">{{ perfil.email_contacto }}</div>
+            <td width="70%">
+                <div class="name">{{ perfil.nombres }}<br>{{ perfil.apellidos }}</div>
+                <div class="contact-info">
+                    {{ perfil.email_contacto }} | {{ perfil.telefonofijo }}<br>
+                    {{ perfil.direcciondomiciliaria }}
+                </div>
             </td>
-            <td width="25%" style="text-align: right;">
+            <td width="30%" class="photo-box">
                 {% if perfil.fotoperfil %}
                     <img src="{{ perfil.fotoperfil.url }}" class="photo">
                 {% endif %}
@@ -33,32 +67,71 @@
         </tr>
     </table>
 
-    <div class="section-title">Perfil</div>
-    <div class="exp-desc">{{ perfil.descripcionperfil }}</div>
+    <div class="section-title">Perfil Profesional</div>
+    <div class="item-desc">{{ perfil.descripcionperfil }}</div>
 
     <div class="section-title">Información Personal</div>
     <table class="data-table">
         <tr><td class="label">Cédula:</td><td class="value">{{ perfil.numerocedula }}</td></tr>
         <tr><td class="label">Nacionalidad:</td><td class="value">{{ perfil.nacionalidad }}</td></tr>
-        <tr><td class="label">Dirección Domiciliaria:</td><td class="value">{{ perfil.direcciondomiciliaria }}</td></tr>
-        <tr><td class="label">Teléfono:</td><td class="value">{{ perfil.telefonofijo }}</td></tr>
+        <tr><td class="label">Estado Civil:</td><td class="value">{{ perfil.estadocivil }}</td></tr>
+        {% if perfil.sitioweb %}
+        <tr><td class="label">Sitio Web:</td><td class="value">{{ perfil.sitioweb }}</td></tr>
+        {% endif %}
     </table>
 
     <div class="section-title">Experiencia Laboral</div>
     {% for exp in items %}
-        <div class="exp-container">
-            <div class="job-title">{{ exp.cargodesempenado }}</div>
-            <div class="company-info">{{ exp.nombrempresa }} — {{ exp.lugarempresa }}</div>
-            <div class="exp-desc">{{ exp.descripcionfunciones }}</div>
+        <div class="item-container">
+            <div class="item-title">{{ exp.cargodesempenado }}</div>
+            <div class="item-subtitle">{{ exp.nombrempresa }} — {{ exp.lugarempresa }}</div>
+            <div class="item-date">
+                {{ exp.fechainiciogestion|date:"d/m/Y" }} — 
+                {% if exp.fechafingestion %}{{ exp.fechafingestion|date:"d/m/Y" }}{% else %}Actualidad{% endif %}
+            </div>
+            <div class="item-desc">{{ exp.descripcionfunciones }}</div>
         </div>
+    {% empty %}
+        <p>No hay experiencia registrada.</p>
     {% endfor %}
 
-    <div class="section-title">Cursos Realizados</div>
-    {% for curso in cursos %}
-        <div class="exp-container">
-            <div class="job-title">{{ curso.nombrecurso }}</div>
-            <div class="exp-desc">{{ curso.totalhoras }} horas</div>
+    {% if productos or productos_laborales %}
+    <div class="section-title">Productos y Proyectos</div>
+    {% for pl in productos_laborales %}
+        <div class="item-container">
+            <div class="item-title">• {{ pl.nombreproducto }}</div>
+            <div class="item-desc">{{ pl.descripcion }}</div>
         </div>
     {% endfor %}
+    {% for pa in productos %}
+        <div class="item-container">
+            <div class="item-title">• {{ pa.nombrerecurso }}</div>
+            <div class="item-subtitle">{{ pa.clasificador }}</div>
+            <div class="item-desc">{{ pa.descripcion }}</div>
+        </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="section-title">Cursos y Capacitaciones</div>
+    {% for curso in cursos %}
+        <div class="item-container">
+            <div class="item-title">{{ curso.nombrecurso }}</div>
+            <div class="item-subtitle">{{ curso.entidadpatrocinadora }} ({{ curso.totalhoras }} horas)</div>
+        </div>
+    {% empty %}
+        <p>No hay cursos registrados.</p>
+    {% endfor %}
+
+    {% if reconocimientos %}
+    <div class="section-title">Reconocimientos</div>
+    {% for rec in reconocimientos %}
+        <div class="item-container">
+            <div class="item-title">{{ rec.tiporeconocimiento }}</div>
+            <div class="item-subtitle">{{ rec.entidadpatrocinadora }} ({{ rec.fechareconocimiento|date:"Y" }})</div>
+            <div class="item-desc">{{ rec.descripcionreconocimiento }}</div>
+        </div>
+    {% endfor %}
+    {% endif %}
+
 </body>
 </html>
