@@ -1,81 +1,90 @@
 import io
-import os
-from django.shortcuts import render
+import requests
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.template.loader import get_template
-from django.conf import settings
 from xhtml2pdf import pisa
-from PyPDF2 import PdfMerger
+from pypdf import PdfWriter  # Asegúrate de tener: pip install pypdf
 
 from Perfil.models import (
     DatosPersonales, ExperienciaLaboral, 
-    CursosRealizados, VentaGarage,
-    Reconocimientos, ProductosAcademicos, ProductosLaborales
+    CursosRealizados, Reconocimientos, 
+    ProductosAcademicos, ProductosLaborales
 )
 
-def get_active_profile():
-    return DatosPersonales.objects.filter(perfilactivo=1).first()
-
 def link_callback(uri, rel):
-    """Permite que Render encuentre tu foto de perfil correctamente"""
-    if uri.startswith(settings.MEDIA_URL):
-        path = os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, ""))
-    elif uri.startswith(settings.STATIC_URL):
-        path = os.path.join(settings.STATIC_ROOT, uri.replace(settings.STATIC_URL, ""))
-    else:
-        return uri
-    return path
+    """Necesario para que xhtml2pdf cargue la foto de perfil en el PDF"""
+    return uri
 
-# --- Vistas de Navegación ---
-def home(request): return render(request, 'home.html', {'perfil': get_active_profile()})
-def experiencia(request): return render(request, 'experiencia.html', {'datos': ExperienciaLaboral.objects.all(), 'perfil': get_active_profile()})
-def productos_academicos(request): return render(request, 'productos_academicos.html', {'datos': ProductosAcademicos.objects.all(), 'perfil': get_active_profile()})
-def productos_laborales(request): return render(request, 'productos_laborales.html', {'datos': ProductosLaborales.objects.all(), 'perfil': get_active_profile()})
-def cursos(request): return render(request, 'cursos.html', {'datos': CursosRealizados.objects.all(), 'perfil': get_active_profile()})
-def reconocimientos(request): return render(request, 'reconocimientos.html', {'datos': Reconocimientos.objects.all(), 'perfil': get_active_profile()})
-def garage(request): return render(request, 'garage.html', {'datos': VentaGarage.objects.all(), 'perfil': get_active_profile()})
+def crear_caratula(titulo):
+    """Genera una página de separación simple en memoria"""
+    html = f"""
+    <html><body style="font-family: Helvetica; text-align: center; padding-top: 10cm;">
+        <h1 style="font-size: 40pt; color: #004085; border: 5px solid #004085; padding: 20px;">{titulo}</h1>
+    </body></html>
+    """
+    buffer = io.BytesIO()
+    pisa.CreatePDF(io.BytesIO(html.encode("UTF-8")), dest=buffer)
+    return buffer
 
-# --- Exportación PDF Maestra ---
-def exportar_cv_completo(request):
-    perfil = get_active_profile()
+def pdf_datos_personales(request):
+    perfil = get_object_or_404(DatosPersonales, perfilactivo=1)
+    
+    # Consultas filtradas exactamente como las tienes
+    experiencias = ExperienciaLaboral.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
+    productos_academicos = ProductosAcademicos.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
+    productos_laborales = ProductosLaborales.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
+    cursos_objs = CursosRealizados.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
+    reconocimientos_objs = Reconocimientos.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
+
+    # --- PARTE A: GENERAR EL CV BASE ---
+    template = get_template('cv_pdf_maestro.html')
     context = {
         'perfil': perfil,
-        'experiencias': ExperienciaLaboral.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
-        'cursos': CursosRealizados.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
-        'reconocimientos': Reconocimientos.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
-        'academicos': ProductosAcademicos.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
-        'laborales': ProductosLaborales.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True),
+        'items': experiencias,
+        'productos': productos_academicos,
+        'productos_laborales': productos_laborales,
+        'cursos': cursos_objs,
+        'reconocimientos': reconocimientos_objs,
     }
-
-    # 1. Crear el PDF con el texto y diseño
-    template = get_template('cv_pdf_maestro.html')
     html = template.render(context)
-    pdf_base = io.BytesIO()
-    pisa.CreatePDF(io.BytesIO(html.encode("UTF-8")), dest=pdf_base, link_callback=link_callback)
+    buffer_cv_base = io.BytesIO()
+    pisa.CreatePDF(io.BytesIO(html.encode("UTF-8")), dest=buffer_cv_base, link_callback=link_callback)
 
-    # 2. Merger para unir los documentos reales
-    merger = PdfMerger()
-    pdf_base.seek(0)
-    merger.append(pdf_base)
+    # --- PARTE B: UNIR CON LOS PDFs (Anexos) ---
+    writer = PdfWriter()
+    buffer_cv_base.seek(0)
+    writer.append(buffer_cv_base)
 
-    # 3. Función segura para adjuntar archivos PDF originales
-    def adjuntar_pdf(campo):
-        if campo and hasattr(campo, 'name') and campo.name.lower().endswith('.pdf'):
+    # 1. Anexar Cursos
+    cursos_con_pdf = [c for c in cursos_objs if c.rutacertificado]
+    if cursos_con_pdf:
+        caratula = crear_caratula("Certificados de Cursos")
+        caratula.seek(0)
+        writer.append(caratula)
+        for curso in cursos_con_pdf:
             try:
-                with campo.open(mode='rb') as f:
-                    merger.append(io.BytesIO(f.read()))
+                response = requests.get(curso.rutacertificado.url, timeout=15)
+                if response.status_code == 200:
+                    writer.append(io.BytesIO(response.content))
             except: pass
 
-    # Adjuntar certificados reales al final
-    for c in context['cursos']: adjuntar_pdf(c.rutacertificado)
-    for r in context['reconocimientos']: adjuntar_pdf(r.rutacertificado)
+    # 2. Anexar Reconocimientos
+    reco_con_pdf = [r for r in reconocimientos_objs if r.rutacertificado]
+    if reco_con_pdf:
+        caratula = crear_caratula("Reconocimientos")
+        caratula.seek(0)
+        writer.append(caratula)
+        for reco in reco_con_pdf:
+            try:
+                response = requests.get(reco.rutacertificado.url, timeout=15)
+                if response.status_code == 200:
+                    writer.append(io.BytesIO(response.content))
+            except: pass
 
-    # 4. Respuesta
-    output = io.BytesIO()
-    merger.write(output)
-    merger.close()
-    output.seek(0)
-
-    response = HttpResponse(output.read(), content_type='application/pdf')
+    # --- PARTE C: RESPUESTA ---
+    response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="Portafolio_{perfil.apellidos}.pdf"'
+    writer.write(response)
+    writer.close()
     return response
