@@ -95,19 +95,39 @@
                 </div>
 
                 <div class="col-md-5 col-12 small">
-                    <i class="bi bi-geo-alt-fill"></i>
-                    <span class="info-label">Ubicación:</span> {{ perfil.direcciondomiciliaria }}
+                    <i class="bi bi-telephone-fill"></i>
+                    <span class="info-label">Telf. Fijo:</span> {{ perfil.telefonofijo|default:"N/A" }}
                 </div>
 
                 <div class="col-md-6 col-12 small">
-                    <i class="bi bi-phone-fill"></i>
-                    <span class="info-label">Telf:</span> {{ perfil.telefonofijo|default:"N/A" }}
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span class="info-label">Ubicación:</span> {{ perfil.direcciondomiciliaria }}
                 </div>
 
                 <div class="col-md-6 col-12 small">
                     <i class="bi bi-card-text"></i>
                     <span class="info-label">Cédula:</span>
                     *******{{ perfil.numerocedula|slice:"-3:" }}
+                </div>
+
+                <div class="col-md-6 col-12 small">
+                    <i class="bi bi-flag-fill"></i>
+                    <span class="info-label">Nacionalidad:</span> {{ perfil.nacionalidad }}
+                </div>
+
+                <div class="col-md-6 col-12 small">
+                    <i class="bi bi-calendar-event-fill"></i>
+                    <span class="info-label">F. Nacimiento:</span> {{ perfil.fechanacimiento }}
+                </div>
+
+                <div class="col-md-6 col-12 small">
+                    <i class="bi bi-heart-fill"></i>
+                    <span class="info-label">Estado Civil:</span> {{ perfil.estadocivil }}
+                </div>
+
+                <div class="col-md-6 col-12 small">
+                    <i class="bi bi-car-front-fill"></i>
+                    <span class="info-label">Licencia:</span> {{ perfil.licenciaconducir|default:"No posee" }}
                 </div>
             </div>
         </div>
