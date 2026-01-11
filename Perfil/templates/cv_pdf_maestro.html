@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        /* Configuración global de página */
         @page { 
             size: letter; 
             margin: 1.5cm; 
@@ -15,37 +14,28 @@
             font-size: 10pt;
         }
         
-        /* Salto de página para el Anexo */
+        /* Salto de página */
         .page-break { display: block; page-break-before: always; }
 
-        /* Estilo de la Portada de Anexos (Corregido) */
-        .anexo-container {
-            text-align: center;
-            padding-top: 6cm; /* Centrado vertical aproximado */
-        }
-        .anexo-box {
-            background-color: #0d6efd;
-            color: white;
-            padding: 40px;
-            border-radius: 15px;
-            display: inline-block;
-            width: 80%;
+        /* Estilo Minimalista para el Anexo */
+        .anexo-minimal {
+            text-align: left;
+            margin-top: 8cm;
+            border-left: 5px solid #0d6efd; /* Solo una línea azul fina al costado */
+            padding-left: 30px;
         }
         .anexo-title { 
-            font-size: 35pt; 
+            font-size: 28pt; 
             font-weight: bold; 
-            text-transform: uppercase; 
+            color: #222;
             margin: 0;
         }
-        .anexo-divider {
-            border-top: 2px solid white;
-            width: 40%;
-            margin: 20px auto;
-        }
         .anexo-subtitle {
-            font-size: 14pt;
-            font-style: italic;
-            opacity: 0.9;
+            font-size: 12pt;
+            color: #666;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         /* Estilos del CV */
@@ -155,13 +145,10 @@
     {% endif %}
 
     <div class="page-break"></div>
-    <div class="anexo-container">
-        <div class="anexo-box">
-            <h1 class="anexo-title">Anexo</h1>
-            <div class="anexo-divider"></div>
-            <h2 class="anexo-title" style="font-size: 22pt;">Certificados y Evidencias</h2>
-            <p class="anexo-subtitle">Sustento de formación y trayectoria profesional</p>
-        </div>
+    <div class="anexo-minimal">
+        <div class="anexo-title">Anexo:</div>
+        <div class="anexo-title" style="color: #0d6efd;">Cursos y Certificados</div>
+        <p class="anexo-subtitle">Documentos de respaldo de formación académica y profesional</p>
     </div>
 
 </body>
