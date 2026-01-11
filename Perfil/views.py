@@ -15,7 +15,7 @@ from Perfil.models import (
 def get_active_profile():
     return DatosPersonales.objects.filter(perfilactivo=1).first()
 
-# --- VISTA HOME (CORREGIDA PARA QUE SALGAN LOS DATOS) ---
+# --- VISTA HOME ---
 def home(request):
     perfil = get_active_profile()
     if not perfil:
@@ -32,7 +32,7 @@ def home(request):
     }
     return render(request, 'home.html', context)
 
-# --- VISTAS DE NAVEGACIÓN RESTANTES ---
+# --- VISTAS DE NAVEGACIÓN ---
 def experiencia(request): return render(request, 'experiencia.html', {'datos': ExperienciaLaboral.objects.all(), 'perfil': get_active_profile()})
 def productos_academicos(request): return render(request, 'productos_academicos.html', {'datos': ProductosAcademicos.objects.all(), 'perfil': get_active_profile()})
 def productos_laborales(request): return render(request, 'productos_laborales.html', {'datos': ProductosLaborales.objects.all(), 'perfil': get_active_profile()})
@@ -40,18 +40,18 @@ def cursos(request): return render(request, 'cursos.html', {'datos': CursosReali
 def reconocimientos(request): return render(request, 'reconocimientos.html', {'datos': Reconocimientos.objects.all(), 'perfil': get_active_profile()})
 def garage(request): return render(request, 'garage.html', {'datos': VentaGarage.objects.all(), 'perfil': get_active_profile()})
 
-# --- VISTA DEL PDF (MAESTRA) ---
-def exportar_cv_completo(request):
+# --- VISTA DEL PDF (CON EL NOMBRE QUE PIDE TU URLS.PY) ---
+def pdf_datos_personales(request):
     perfil = get_object_or_404(DatosPersonales, perfilactivo=1)
     
-    # Datos para el PDF
+    # Consultas para el contenido del CV
     experiencias = ExperienciaLaboral.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
     academicos = ProductosAcademicos.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
     laborales = ProductosLaborales.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
     cursos_objs = CursosRealizados.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
     reco_objs = Reconocimientos.objects.filter(idperfilconqueestaactivo=perfil, activarparaqueseveaenfront=True)
 
-    # 1. Crear el PDF del CV base
+    # 1. Generar PDF base desde HTML
     template = get_template('cv_pdf_maestro.html')
     html = template.render({
         'perfil': perfil, 'items': experiencias, 'productos': academicos,
@@ -61,7 +61,7 @@ def exportar_cv_completo(request):
     buffer_cv = io.BytesIO()
     pisa.CreatePDF(io.BytesIO(html.encode("UTF-8")), dest=buffer_cv)
 
-    # 2. Unir anexos
+    # 2. Unir Anexos (PDFs de certificados)
     writer = PdfWriter()
     buffer_cv.seek(0)
     writer.append(buffer_cv)
@@ -70,14 +70,17 @@ def exportar_cv_completo(request):
         for obj in queryset:
             if obj.rutacertificado:
                 try:
+                    # Se descarga desde la URL (Cloudinary/S3) para evitar problemas de rutas en Render
                     r = requests.get(obj.rutacertificado.url, timeout=10)
                     if r.status_code == 200:
                         writer.append(io.BytesIO(r.content))
-                except: pass
+                except Exception:
+                    continue
 
     pegar_certificados(cursos_objs)
     pegar_certificados(reco_objs)
 
+    # 3. Respuesta final
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="Portafolio_{perfil.apellidos}.pdf"'
     writer.write(response)
