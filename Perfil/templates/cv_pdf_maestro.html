@@ -5,151 +5,173 @@
     <style>
         @page { 
             size: letter; 
-            margin: 1.5cm; 
+            margin: 0; /* Quitamos margen global para el borde lateral */
         }
         body { 
-            font-family: Helvetica, Arial, sans-serif; 
+            font-family: 'Helvetica', Arial, sans-serif; 
             color: #333; 
-            line-height: 1.2; 
+            line-height: 1.4; 
             font-size: 10pt;
+            margin: 0;
+            padding: 0;
         }
         
-        /* Salto de página */
+        /* Barra lateral de diseño */
+        .sidebar-accent {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            background-color: #0d6efd;
+        }
+
+        .content-wrapper {
+            margin-left: 1.5cm;
+            margin-right: 1.5cm;
+            margin-top: 1.5cm;
+            margin-bottom: 1.5cm;
+        }
+
         .page-break { display: block; page-break-before: always; }
 
-        /* Estilo Minimalista para el Anexo */
-        .anexo-minimal {
-            text-align: left;
-            margin-top: 8cm;
-            border-left: 5px solid #0d6efd; /* Solo una línea azul fina al costado */
-            padding-left: 30px;
-        }
-        .anexo-title { 
-            font-size: 28pt; 
+        /* Encabezado Estilizado */
+        .header-table { width: 100%; margin-bottom: 25px; }
+        .name { font-size: 26pt; font-weight: bold; color: #1a1a1a; line-height: 1; }
+        .job-title { color: #0d6efd; font-size: 13pt; font-weight: bold; margin-top: 5px; }
+        .contact-info { font-size: 9pt; color: #666; margin-top: 10px; }
+        .photo { width: 100px; height: 100px; border-radius: 50%; border: 3px solid #f0f0f0; }
+
+        /* Secciones con diseño de "Underline" parcial */
+        .section-title { 
             font-weight: bold; 
-            color: #222;
-            margin: 0;
-        }
-        .anexo-subtitle {
-            font-size: 12pt;
-            color: #666;
-            margin-top: 10px;
-            text-transform: uppercase;
+            text-transform: uppercase; 
+            font-size: 11pt; 
+            margin-top: 25px; 
+            color: #0d6efd; 
             letter-spacing: 1px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .section-title span {
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 5px;
         }
 
-        /* Estilos del CV */
-        .header { width: 100%; border-bottom: 2px solid #004085; padding-bottom: 10px; margin-bottom: 20px; }
-        .name { font-size: 24pt; font-weight: bold; text-transform: uppercase; color: #004085; }
-        .contact-info { font-size: 9pt; color: #555; margin-top: 5px; }
-        
-        .section-title { 
-            font-weight: bold; text-transform: uppercase; font-size: 12pt; 
-            margin-top: 20px; color: #004085; border-bottom: 1px solid #004085; 
-            padding-bottom: 3px; margin-bottom: 10px;
+        /* Items de Experiencia y Educación */
+        .item-container { margin-bottom: 15px; padding-left: 10px; border-left: 2px solid #f8f9fa; }
+        .item-title { font-weight: bold; font-size: 11pt; color: #1a1a1a; }
+        .item-subtitle { color: #444; font-weight: 600; font-size: 10pt; }
+        .item-date { font-size: 8.5pt; color: #0d6efd; font-weight: bold; text-transform: uppercase; }
+        .item-desc { margin-top: 5px; text-align: justify; color: #555; }
+
+        /* Información Personal en cuadrícula */
+        .info-grid { width: 100%; margin-top: 10px; }
+        .info-label { font-weight: bold; color: #444; width: 25%; padding: 4px 0; }
+        .info-value { color: #666; padding: 4px 0; }
+
+        /* Portada de Anexo Elegante */
+        .anexo-page {
+            text-align: center;
+            padding-top: 9cm;
         }
-        
-        .data-table { width: 100%; border-collapse: collapse; }
-        .label { font-weight: bold; width: 30%; padding: 3px 0; color: #444; }
-        .value { width: 70%; padding: 3px 0; }
-        
-        .item-container { margin-bottom: 12px; }
-        .item-title { font-weight: bold; font-size: 11pt; color: #000; }
-        .item-subtitle { font-weight: bold; color: #004085; font-size: 10pt; }
-        .item-date { font-size: 9pt; color: #666; font-style: italic; }
-        .item-desc { margin-top: 5px; text-align: justify; line-height: 1.3; }
-        
-        .photo-box { text-align: right; }
-        .photo { width: 110px; height: auto; border: 1px solid #ccc; }
+        .anexo-line {
+            width: 60px;
+            height: 4px;
+            background-color: #0d6efd;
+            margin: 20px auto;
+        }
+        .anexo-text-main {
+            font-size: 32pt;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin: 0;
+        }
+        .anexo-text-sub {
+            font-size: 12pt;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
     </style>
 </head>
 <body>
+    <div class="sidebar-accent"></div>
 
-    <table class="header">
-        <tr>
-            <td width="70%">
-                <div class="name">{{ perfil.nombres }}<br>{{ perfil.apellidos }}</div>
-                <div class="contact-info">
-                    {{ perfil.email_contacto }} | {{ perfil.telefonofijo }}<br>
-                    {{ perfil.direcciondomiciliaria }}
+    <div class="content-wrapper">
+        <table class="header-table">
+            <tr>
+                <td width="75%">
+                    <div class="name">{{ perfil.nombres }} {{ perfil.apellidos }}</div>
+                    <div class="job-title">{{ perfil.descripcionperfil|truncatechars:50 }}</div>
+                    <div class="contact-info">
+                        <strong>Email:</strong> {{ perfil.email_contacto }} | <strong>Telf:</strong> {{ perfil.telefonofijo }}<br>
+                        <strong>Dirección:</strong> {{ perfil.direcciondomiciliaria }}
+                    </div>
+                </td>
+                <td width="25%" style="text-align: right;">
+                    {% if perfil.fotoperfil %}
+                        <img src="{{ perfil.fotoperfil.url }}" class="photo">
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+
+        <div class="section-title"><span>Perfil Profesional</span></div>
+        <div class="item-desc" style="border-left: none; padding-left: 0;">{{ perfil.descripcionperfil }}</div>
+
+        <div class="section-title"><span>Información Personal</span></div>
+        <table class="info-grid">
+            <tr>
+                <td class="info-label">Cédula:</td><td class="info-value">{{ perfil.numerocedula }}</td>
+                <td class="info-label">Nacionalidad:</td><td class="info-value">{{ perfil.nacionalidad }}</td>
+            </tr>
+            <tr>
+                <td class="info-label">Estado Civil:</td><td class="info-value">{{ perfil.estadocivil }}</td>
+                <td class="info-label">Fecha Nac.:</td><td class="info-value">{{ perfil.fechanacimiento }}</td>
+            </tr>
+        </table>
+
+        <div class="section-title"><span>Experiencia Laboral</span></div>
+        {% for exp in items %}
+            <div class="item-container">
+                <div class="item-date">
+                    {{ exp.fechainiciogestion|date:"M Y" }} — {% if exp.fechafingestion %}{{ exp.fechafingestion|date:"M Y" }}{% else %}Actualidad{% endif %}
                 </div>
-            </td>
-            <td width="30%" class="photo-box">
-                {% if perfil.fotoperfil %}
-                    <img src="{{ perfil.fotoperfil.url }}" class="photo">
-                {% endif %}
-            </td>
-        </tr>
-    </table>
-
-    <div class="section-title">Perfil Profesional</div>
-    <div class="item-desc">{{ perfil.descripcionperfil }}</div>
-
-    <div class="section-title">Información Personal</div>
-    <table class="data-table">
-        <tr><td class="label">Cédula:</td><td class="value">{{ perfil.numerocedula }}</td></tr>
-        <tr><td class="label">Nacionalidad:</td><td class="value">{{ perfil.nacionalidad }}</td></tr>
-        <tr><td class="label">Estado Civil:</td><td class="value">{{ perfil.estadocivil }}</td></tr>
-        {% if perfil.sitioweb %}
-        <tr><td class="label">Sitio Web:</td><td class="value">{{ perfil.sitioweb }}</td></tr>
-        {% endif %}
-    </table>
-
-    <div class="section-title">Experiencia Laboral</div>
-    {% for exp in items %}
-        <div class="item-container">
-            <div class="item-title">{{ exp.cargodesempenado }}</div>
-            <div class="item-subtitle">{{ exp.nombrempresa }} — {{ exp.lugarempresa }}</div>
-            <div class="item-date">
-                {{ exp.fechainiciogestion|date:"d/m/Y" }} — 
-                {% if exp.fechafingestion %}{{ exp.fechafingestion|date:"d/m/Y" }}{% else %}Actualidad{% endif %}
+                <div class="item-title">{{ exp.cargodesempenado }}</div>
+                <div class="item-subtitle">{{ exp.nombrempresa }} — {{ exp.lugarempresa }}</div>
+                <div class="item-desc">{{ exp.descripcionfunciones }}</div>
             </div>
-            <div class="item-desc">{{ exp.descripcionfunciones }}</div>
-        </div>
-    {% endfor %}
+        {% endfor %}
 
-    {% if productos or productos_laborales %}
-    <div class="section-title">Productos y Proyectos</div>
-    {% for pl in productos_laborales %}
-        <div class="item-container">
-            <div class="item-title">• {{ pl.nombreproducto }}</div>
-            <div class="item-desc">{{ pl.descripcion }}</div>
-        </div>
-    {% endfor %}
-    {% for pa in productos %}
-        <div class="item-container">
-            <div class="item-title">• {{ pa.nombrerecurso }}</div>
-            <div class="item-subtitle">{{ pa.clasificador }}</div>
-            <div class="item-desc">{{ pa.descripcion }}</div>
-        </div>
-    {% endfor %}
-    {% endif %}
+        <div class="section-title"><span>Formación Continua</span></div>
+        {% for curso in cursos %}
+            <div class="item-container">
+                <div class="item-title">{{ curso.nombrecurso }}</div>
+                <div class="item-subtitle">{{ curso.entidadpatrocinadora }} ({{ curso.totalhoras }} Horas)</div>
+            </div>
+        {% endfor %}
 
-    <div class="section-title">Cursos y Capacitaciones</div>
-    {% for curso in cursos %}
-        <div class="item-container">
-            <div class="item-title">{{ curso.nombrecurso }}</div>
-            <div class="item-subtitle">{{ curso.entidadpatrocinadora }} ({{ curso.totalhoras }} horas)</div>
-        </div>
-    {% endfor %}
+        {% if reconocimientos %}
+        <div class="section-title"><span>Reconocimientos</span></div>
+        {% for rec in reconocimientos %}
+            <div class="item-container">
+                <div class="item-title">{{ rec.tiporeconocimiento }}</div>
+                <div class="item-subtitle">{{ rec.entidadpatrocinadora }} ({{ rec.fechareconocimiento|date:"Y" }})</div>
+            </div>
+        {% endfor %}
+        {% endif %}
 
-    {% if reconocimientos %}
-    <div class="section-title">Reconocimientos</div>
-    {% for rec in reconocimientos %}
-        <div class="item-container">
-            <div class="item-title">{{ rec.tiporeconocimiento }}</div>
-            <div class="item-subtitle">{{ rec.entidadpatrocinadora }} ({{ rec.fechareconocimiento|date:"Y" }})</div>
-            <div class="item-desc">{{ rec.descripcionreconocimiento }}</div>
+        <div class="page-break"></div>
+        <div class="anexo-page">
+            <div class="anexo-text-sub">Documentación</div>
+            <div class="anexo-line"></div>
+            <div class="anexo-text-main">Anexos y Certificados</div>
+            <div class="anexo-line"></div>
+            <p style="color: #888;">Portafolio de evidencias profesionales</p>
         </div>
-    {% endfor %}
-    {% endif %}
-
-    <div class="page-break"></div>
-    <div class="anexo-minimal">
-        <div class="anexo-title">Anexo:</div>
-        <div class="anexo-title" style="color: #0d6efd;">Cursos y Certificados</div>
-        <p class="anexo-subtitle">Documentos de respaldo de formación académica y profesional</p>
     </div>
-
 </body>
 </html>
